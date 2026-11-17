@@ -1,0 +1,169 @@
+* {
+  box-sizing: border-box;
+}
+
+.dashboard {
+  display: flex;
+  min-height: 100vh;
+  background: #f3f6fa;
+  color: #243447;
+  font-family: Arial, sans-serif;
+}
+
+.sidebar {
+  width: 240px;
+  background: #173b5e;
+  color: white;
+  padding: 28px 18px;
+}
+
+.sidebar h2 {
+  margin-bottom: 5px;
+}
+
+.sidebar p {
+  color: #c4d5e5;
+  font-size: 14px;
+}
+
+.sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 40px;
+}
+
+.menu-item {
+  background: transparent;
+  color: white;
+  text-align: left;
+  padding: 13px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.menu-item:hover {
+  background: #28577f;
+}
+
+.dashboard-main {
+  flex: 1;
+  padding: 35px;
+  min-width: 0;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.dashboard-header h1 {
+  margin-bottom: 8px;
+}
+
+.admin-label {
+  background: #e1edf7;
+  color: #174a75;
+  padding: 10px 15px;
+  border-radius: 20px;
+  font-size: 13px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  margin-bottom: 30px;
+}
+
+.stat-card {
+  background: white;
+  padding: 22px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+}
+
+.stat-card p {
+  color: #718096;
+}
+
+.stat-card h2 {
+  font-size: 30px;
+  margin-bottom: 0;
+}
+
+.visitor-section {
+  background: white;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+}
+
+.visitor-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+}
+
+.export-button {
+  padding: 11px 16px;
+  background: #174a75;
+  color: white;
+  border: none;
+  border-radius: 6px;
+}
+
+.search-box {
+  width: 100%;
+  padding: 13px;
+  margin-top: 22px;
+  border: 1px solid #d6dee7;
+  border-radius: 6px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 55px 15px;
+  color: #718096;
+}
+
+@media (max-width: 850px) {
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .dashboard-main {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 550px) {
+  .dashboard {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+  }
+
+  .sidebar nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-top: 20px;
+  }
+
+  .stats {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-header,
+  .visitor-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
