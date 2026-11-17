@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import "./App.css";
 import { supabase } from "./supabase";
 import Dashboard from "./Dashboard.jsx";
-import Login from "./login.jsx";
+import Login from "./Login.jsx";
 
 function App() {
   const [page, setPage] = useState("registration");
