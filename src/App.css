@@ -86,3 +86,47 @@ button:hover {
     padding: 22px;
   }
 }
+
+.product-hint {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 12px;
+}
+
+.product-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.product-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 13px;
+  border: 1px solid #dce3e9;
+  border-radius: 8px;
+  background: #ffffff;
+  cursor: pointer;
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+.product-option input[type="checkbox"] {
+  flex-shrink: 0;
+  width: 17px;
+  height: 17px;
+  margin: 2px 0 0;
+  cursor: pointer;
+}
+
+.product-option span {
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+
+.product-option:has(input:checked) {
+  border-color: #174a75;
+  background: #f2f7fb;
+}

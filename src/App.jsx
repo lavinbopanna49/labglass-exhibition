@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import "./App.css";
 import { supabase } from "./supabase";
@@ -36,12 +37,17 @@ function App() {
   }, []);
 
   const products = [
-    "Laboratory Beakers",
-    "Measuring Cylinders",
-    "Test Tubes",
-    "Laboratory Flasks",
-    "Pipettes",
-    "Other Glassware",
+    "Jacketed Glass Reactors (100 mL to 100 L), including Double-Jacketed (Vacuum-Insulated) Systems",
+    "Glass Wiped Film Evaporators",
+    "Short Path Distillation Systems",
+    "Glass Filter Reactors and Nutsche Filter Units (1 L to 20 L)",
+    "Continuous Stirred Tank Reactor (CSTR) Systems",
+    "Photochemical Reactors",
+    "Fractional Distillation Systems with Insulated Columns and Structured Packing",
+    "Jointed Laboratory Glassware, including Adapters, Condensers, Flasks, Columns, and Custom-Designed Items",
+    "Glassware Spares for Rotary Evaporators (Compatible with All Major Brands)",
+    "Schlenk Line Glassware, including Manifolds, Flasks, and Tubes",
+    "Other Glass Items"
   ];
 
   function handleChange(event) {
@@ -77,7 +83,9 @@ function App() {
       return;
     }
 
-    alert("Thank you, " + form.name + "! Your registration has been saved.");
+    alert(
+      "Thank you, " + form.name + "! Your registration has been saved."
+    );
 
     setForm({
       name: "",
@@ -98,10 +106,10 @@ function App() {
 
     if (!session) {
       return (
-       <Login
-        onLogin={() => setPage("dashboard")}
-        onBack={() => setPage("registration")}
-       />
+        <Login
+          onLogin={() => setPage("dashboard")}
+          onBack={() => setPage("registration")}
+        />
       );
     }
 
@@ -171,16 +179,22 @@ function App() {
 
         <h3>Products Interested In</h3>
 
-        {products.map((product) => (
-          <label className="checkbox" key={product}>
-            <input
-              type="checkbox"
-              checked={form.interests.includes(product)}
-              onChange={() => handleInterest(product)}
-            />
-            {product}
-          </label>
-        ))}
+        <p className="product-hint">
+          Select all products you are interested in.
+        </p>
+
+        <div className="product-list">
+          {products.map((product) => (
+            <label className="product-option" key={product}>
+              <input
+                type="checkbox"
+                checked={form.interests.includes(product)}
+                onChange={() => handleInterest(product)}
+              />
+              <span>{product}</span>
+            </label>
+          ))}
+        </div>
 
         <label>Additional Requirements</label>
         <textarea
