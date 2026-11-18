@@ -32,8 +32,13 @@ function Login({ onLogin, onBack }) {
   return (
     <div className="login-page">
       <form className="login-card" onSubmit={handleLogin}>
-        <h1>H. S. Martin India</h1>
-        <h2>Employee Login</h2>
+        <div className="login-brand">
+          <h1>H. S. MARTIN</h1>
+          <h2>INDIA</h2>
+        </div>
+
+        <h3>Employee Login</h3>
+
         <p>Sign in to access the exhibition dashboard.</p>
 
         <label>Email Address</label>
@@ -55,12 +60,12 @@ function Login({ onLogin, onBack }) {
         {error && <p className="login-error">{error}</p>}
 
         <button type="submit" disabled={loading}>
-  {loading ? "Signing in..." : "Login"}
-</button>
+          {loading ? "Signing in..." : "Login"}
+        </button>
 
-<button type="button" onClick={onBack}>
-  Back to Visitor Registration
-</button>
+        <button type="button" onClick={onBack}>
+          Back to Visitor Registration
+        </button>
       </form>
     </div>
   );

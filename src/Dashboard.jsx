@@ -75,7 +75,7 @@ function Dashboard() {
         (payload) => {
           if (!mounted) return;
 
-          // New visitor registration
+          // NEW VISITOR
           if (payload.eventType === "INSERT") {
             setVisitors((current) => {
               if (
@@ -90,7 +90,7 @@ function Dashboard() {
             });
           }
 
-          // Existing visitor updated
+          // UPDATED VISITOR
           if (payload.eventType === "UPDATE") {
             setVisitors((current) =>
               current.map((visitor) =>
@@ -101,7 +101,7 @@ function Dashboard() {
             );
           }
 
-          // Visitor deleted
+          // DELETED VISITOR
           if (payload.eventType === "DELETE") {
             setVisitors((current) =>
               current.filter(
@@ -233,6 +233,7 @@ function Dashboard() {
         });
       }
 
+      // ALL VISITORS SHEET
       const allVisitors = workbook.addWorksheet("All Visitors");
 
       prepareSheet(
@@ -271,6 +272,7 @@ function Dashboard() {
         }))
       );
 
+      // PROBABILITY OF ORDERING SHEET
       const enquiries = workbook.addWorksheet(
         "Probability of Ordering"
       );
@@ -297,6 +299,7 @@ function Dashboard() {
         }))
       );
 
+      // FOLLOW-UPS SHEET
       const followups = workbook.addWorksheet("Follow-ups");
 
       prepareSheet(
@@ -633,7 +636,7 @@ function Dashboard() {
               </div>
 
               <div className="stat-card">
-                <p>Countries</p>
+                <p>States</p>
                 <h2>{countryCount}</h2>
               </div>
 
