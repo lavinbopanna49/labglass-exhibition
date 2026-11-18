@@ -5,6 +5,7 @@ import { supabase } from "./supabase";
 import Dashboard from "./Dashboard.jsx";
 import Login from "./Login.jsx";
 import logo from "./assets/labglass_logo.jpg";
+import pmecLogo from "./assets/pmec.jpg";
 import background from "./assets/bg.jpg";
 
 function App() {
@@ -103,7 +104,7 @@ function App() {
 
   if (page === "dashboard") {
     if (checkingSession) {
-      return <p>Checking login...</p>;
+      return <p>Checking Login...</p>;
     }
 
     if (!session) {
@@ -134,15 +135,11 @@ function App() {
             className="company-logo"
           />
 
-          <button
-            type="button"
-            className="employee-info-button"
-            onClick={() => setPage("dashboard")}
-            title="Employee Login"
-            aria-label="Employee Login"
-          >
-            i
-          </button>
+          <img
+            src={pmecLogo}
+            alt="PMEC India Exhibition Logo"
+            className="pmec-logo"
+          />
         </div>
 
         <div className="registration-header">
@@ -229,6 +226,19 @@ function App() {
             Submit Registration
           </button>
         </form>
+
+        <div className="employee-login-bottom">
+          <button
+            type="button"
+            className="employee-info-button"
+            onClick={() => setPage("dashboard")}
+            title="Employee Login"
+            aria-label="Employee Login"
+          >
+            i
+          </button>
+        </div>
+
       </div>
     </div>
   );

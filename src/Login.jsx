@@ -57,7 +57,7 @@ function Login({ onLogin, onBack }) {
           required
         />
 
-        {error && <p className="login-error">{error}</p>}
+        {error && <p className="Login-error">{error}</p>}
 
         <button type="submit" disabled={loading}>
           {loading ? "Signing in..." : "Login"}

@@ -34,12 +34,14 @@ body {
   box-shadow: 0 8px 35px rgba(0, 0, 0, 0.18);
 }
 
-/* Logo and information button */
+/* Top logos */
 .registration-topbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 15px;
   margin-bottom: 25px;
+  min-height: 65px;
 }
 
 .registration-topbar .company-logo {
@@ -53,17 +55,39 @@ body {
   margin: 0;
 }
 
-/* Employee login button */
+/* PMEC logo */
+.registration-topbar .pmec-logo {
+  display: block;
+  width: 155px;
+  max-width: 48%;
+  max-height: 75px;
+  height: auto;
+  object-fit: contain;
+  object-position: right center;
+  margin: 0;
+}
+
+/* Bottom employee login button - aligned right */
+.employee-login-bottom {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 15px;
+  padding-top: 8px;
+  padding-right: 5px;
+}
+
+/* Small employee login button */
 .employee-info-button {
-  width: 34px;
-  height: 34px;
+  width: 24px;
+  height: 24px;
   padding: 0;
   margin: 0;
   border: none;
   border-radius: 50%;
   background: #174a75;
   color: white;
-  font-size: 20px;
+  font-size: 14px;
   font-weight: bold;
   display: flex;
   align-items: center;
@@ -92,39 +116,44 @@ body {
   margin: 8px 0 20px;
 }
 
-/* Form */
-form {
+/* Registration form */
+.registration-page .container form {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-form > label {
+.registration-page .container form > label {
+  display: block;
+  width: 92%;
+  text-align: left;
+  align-self: flex-start;
   font-weight: bold;
-  margin-top: 8px;
+  margin: 8px 0 0;
 }
 
-input:not([type="checkbox"]),
-textarea {
-  input:not([type="checkbox"]),
-textarea {
-  width: 90%;
-  padding: 8px 10px;
-  border: 1px solid #ccd5df;
-  border-radius: 6px;
+.registration-page .container form input:not([type="checkbox"]),
+.registration-page .container form textarea {
+  width: 95%;
+  padding: 9px 12px;
+  border: 1px solid #d5dce5;
+  border-radius: 14px;
   font-size: 14px;
   font-family: Arial, sans-serif;
   min-height: 36px;
-}
+  color: #000;
+  background: rgba(255, 255, 255, 0.9);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-input:focus,
-textarea:focus {
+.registration-page .container form input:focus,
+.registration-page .container form textarea:focus {
   outline: none;
   border-color: #2386c5;
+  box-shadow: 0 0 0 3px rgba(35, 134, 197, 0.12);
 }
 
-textarea {
+.registration-page .container form textarea {
   resize: vertical;
 }
 
@@ -174,7 +203,7 @@ textarea {
 }
 
 /* Submit button */
-form button {
+.registration-page .container form button {
   margin-top: 20px;
   padding: 14px;
   border: none;
@@ -185,13 +214,12 @@ form button {
   cursor: pointer;
 }
 
-form button:hover {
+.registration-page .container form button:hover {
   background: #103653;
 }
 
-/* MOBILE DESIGN */
+/* Mobile design */
 @media (max-width: 700px) {
-
   .registration-page {
     padding: 8px 6px;
     background-attachment: scroll;
@@ -204,6 +232,8 @@ form button:hover {
 
   .registration-topbar {
     margin-bottom: 10px;
+    min-height: 48px;
+    gap: 8px;
   }
 
   .registration-topbar .company-logo {
@@ -211,9 +241,15 @@ form button:hover {
     max-height: 45px;
   }
 
+  .registration-topbar .pmec-logo {
+    width: 135px;
+    max-height: 55px;
+  }
+
   .employee-info-button {
-    width: 32px;
-    height: 32px;
+    width: 24px;
+    height: 24px;
+    font-size: 14px;
   }
 
   .registration-header {
@@ -230,20 +266,22 @@ form button:hover {
     margin: 5px 0 12px;
   }
 
-  form {
+  .registration-page .container form {
     gap: 7px;
   }
 
-  form > label {
+  .registration-page .container form > label {
     margin-top: 4px;
     font-size: 14px;
   }
 
-  input:not([type="checkbox"]),
-  textarea {
+  .registration-page .container form input:not([type="checkbox"]),
+  .registration-page .container form textarea {
+    width: 90%;
     padding: 7px 9px;
-  font-size: 14px;
-  min-height: 34px;
+    font-size: 14px;
+    min-height: 34px;
+    border-radius: 12px;
   }
 
   .product-list {
@@ -262,45 +300,12 @@ form button:hover {
     height: 19px;
   }
 
-  form button {
+  .registration-page .container form button {
     margin-top: 10px;
     padding: 12px;
   }
-}
 
-/* Force registration field names to the left */
-.registration-page .container form > label {
-  display: block !important;
-  width: 92% !important;
-  text-align: left !important;
-  align-self: flex-start !important;
-  margin-left: 0 !important;
-  margin-right: auto !important;
-}
-/* Narrower answer boxes with smoother edges */
-.registration-page .container form input:not([type="checkbox"]),
-.registration-page .container form textarea {
-  width: 95% !important;
-  border-radius: 14px !important;
-  border: 1px solid #d5dce5;
-  padding: 9px 12px;
-  background: rgba(255, 255, 255, 0.9);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-/* Smooth focus effect */
-.registration-page .container form input:focus,
-.registration-page .container form textarea:focus {
-  outline: none;
-  border-color: #2386c5;
-  box-shadow: 0 0 0 3px rgba(35, 134, 197, 0.12);
-}
-
-/* Mobile answer boxes */
-@media (max-width: 700px) {
-  .registration-page .container form input:not([type="checkbox"]),
-  .registration-page .container form textarea {
-    width: 90% !important;
-    border-radius: 12px !important;
+  .employee-login-bottom {
+    margin-top: 18px;
   }
 }
