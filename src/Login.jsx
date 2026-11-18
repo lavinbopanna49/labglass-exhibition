@@ -32,7 +32,7 @@ function Login({ onLogin, onBack }) {
   return (
     <div className="login-page">
       <form className="login-card" onSubmit={handleLogin}>
-        <h1>LabGlass</h1>
+        <h1>H. S. Martin India</h1>
         <h2>Employee Login</h2>
         <p>Sign in to access the exhibition dashboard.</p>
 
