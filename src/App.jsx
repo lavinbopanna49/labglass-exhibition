@@ -4,6 +4,8 @@ import "./App.css";
 import { supabase } from "./supabase";
 import Dashboard from "./Dashboard.jsx";
 import Login from "./Login.jsx";
+import logo from "./assets/labglass_logo.jpg";
+import background from "./assets/bg.jpg";
 
 function App() {
   const [page, setPage] = useState("registration");
@@ -47,7 +49,7 @@ function App() {
     "Jointed Laboratory Glassware, including Adapters, Condensers, Flasks, Columns, and Custom-Designed Items",
     "Glassware Spares for Rotary Evaporators (Compatible with All Major Brands)",
     "Schlenk Line Glassware, including Manifolds, Flasks, and Tubes",
-    "Other Glass Items"
+    "Other Glass Items",
   ];
 
   function handleChange(event) {
@@ -117,95 +119,117 @@ function App() {
   }
 
   return (
-    <div className="container">
-      <button
-        type="button"
-        onClick={() => setPage("dashboard")}
-      >
-        Employee Dashboard
-      </button>
+    <div
+      className="registration-page"
+      style={{
+        backgroundImage: `linear-gradient(rgba(255,255,255,0.35), rgba(255,255,255,0.35)), url(${background})`,
+      }}
+    >
+      <div className="container">
 
-      <h1>LabGlass</h1>
-      <h2>Exhibition Visitor Registration</h2>
-      <p>Please fill in your details below.</p>
+        <div className="registration-topbar">
+          <img
+            src={logo}
+            alt="H.S. Martin Logo"
+            className="company-logo"
+          />
 
-      <form onSubmit={handleSubmit}>
-        <label>Full Name *</label>
-        <input
-          name="name"
-          value={form.name}
-          onChange={handleChange}
-          required
-        />
-
-        <label>Company Name *</label>
-        <input
-          name="company"
-          value={form.company}
-          onChange={handleChange}
-          required
-        />
-
-        <label>Designation</label>
-        <input
-          name="designation"
-          value={form.designation}
-          onChange={handleChange}
-        />
-
-        <label>Phone Number *</label>
-        <input
-          name="phone"
-          type="tel"
-          value={form.phone}
-          onChange={handleChange}
-          required
-        />
-
-        <label>Email Address</label>
-        <input
-          name="email"
-          type="email"
-          value={form.email}
-          onChange={handleChange}
-        />
-
-        <label>Country</label>
-        <input
-          name="country"
-          value={form.country}
-          onChange={handleChange}
-        />
-
-        <h3>Products Interested In</h3>
-
-        <p className="product-hint">
-          Select all products you are interested in.
-        </p>
-
-        <div className="product-list">
-          {products.map((product) => (
-            <label className="product-option" key={product}>
-              <input
-                type="checkbox"
-                checked={form.interests.includes(product)}
-                onChange={() => handleInterest(product)}
-              />
-              <span>{product}</span>
-            </label>
-          ))}
+          <button
+            type="button"
+            className="employee-info-button"
+            onClick={() => setPage("dashboard")}
+            title="Employee Login"
+            aria-label="Employee Login"
+          >
+            i
+          </button>
         </div>
 
-        <label>Additional Requirements</label>
-        <textarea
-          name="requirements"
-          value={form.requirements}
-          onChange={handleChange}
-          rows="4"
-        />
+        <div className="registration-header">
+          <h2>Exhibition Visitor Registration</h2>
+          <p>Please fill in your details below.</p>
+        </div>
 
-        <button type="submit">Submit Registration</button>
-      </form>
+        <form onSubmit={handleSubmit}>
+          <label>Full Name *</label>
+          <input
+            name="name"
+            value={form.name}
+            onChange={handleChange}
+            required
+          />
+
+          <label>Company Name *</label>
+          <input
+            name="company"
+            value={form.company}
+            onChange={handleChange}
+            required
+          />
+
+          <label>Designation</label>
+          <input
+            name="designation"
+            value={form.designation}
+            onChange={handleChange}
+          />
+
+          <label>Phone Number *</label>
+          <input
+            name="phone"
+            type="tel"
+            value={form.phone}
+            onChange={handleChange}
+            required
+          />
+
+          <label>Email Address</label>
+          <input
+            name="email"
+            type="email"
+            value={form.email}
+            onChange={handleChange}
+          />
+
+          <label>Country</label>
+          <input
+            name="country"
+            value={form.country}
+            onChange={handleChange}
+          />
+
+          <h3>Products Interested In</h3>
+
+          <p className="product-hint">
+            Select all products you are interested in.
+          </p>
+
+          <div className="product-list">
+            {products.map((product) => (
+              <label className="product-option" key={product}>
+                <input
+                  type="checkbox"
+                  checked={form.interests.includes(product)}
+                  onChange={() => handleInterest(product)}
+                />
+                <span>{product}</span>
+              </label>
+            ))}
+          </div>
+
+          <label>Additional Requirements</label>
+          <textarea
+            name="requirements"
+            value={form.requirements}
+            onChange={handleChange}
+            rows="4"
+          />
+
+          <button type="submit">
+            Submit Registration
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
