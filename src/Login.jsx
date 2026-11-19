@@ -3,6 +3,10 @@ import { useState } from "react";
 import { supabase } from "./supabase";
 import "./Login.css";
 
+import backgroundImage from "./assets/bg.jpg";
+import pmecImage from "./assets/pmec.jpg";
+import logoImage from "./assets/labglass_logo.jpg";
+
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -32,23 +36,20 @@ function Login() {
     <main className="login-page">
       <img
         className="login-background"
-        src="/src/assets/bg.jpg"
+        src={backgroundImage}
         alt=""
       />
 
       <img
         className="login-pmec"
-        src="/src/assets/pmec.jpg"
+        src={pmecImage}
         alt="PMEC"
       />
 
       <div className="login-overlay">
         <form className="login-card" onSubmit={handleLogin}>
           <div className="login-brand">
-            <img
-              src="/src/assets/labglass_logo.jpg"
-              alt="H. S. Martin India"
-            />
+            <img src={logoImage} alt="H. S. Martin India" />
           </div>
 
           <h3>User Login</h3>
