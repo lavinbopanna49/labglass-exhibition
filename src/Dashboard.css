@@ -434,17 +434,19 @@
   background: #475569;
 }
 
+
 /* =====================================
    CUSTOMER PROBABILITY
 ===================================== */
 
 .probability-panel {
   width: 100%;
-  margin-top: 22px;
-  padding: 20px;
+  margin-top: 12px;
+  padding: 10px 14px;
   background: #f5f8fc;
   border: 1px solid #e0e7ef;
-  border-radius: 12px;
+  border-radius: 10px;
+  box-sizing: border-box;
 }
 
 .probability-heading {
@@ -457,26 +459,21 @@
 .probability-heading h4 {
   margin: 0;
   color: #174a75;
-  font-size: 17px;
-}
-
-.probability-value {
-  margin: 15px 0 10px;
-  font-size: 27px;
-  font-weight: bold;
-  color: #243447;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .probability-badge {
   padding: 6px 12px;
   border-radius: 20px;
   font-size: 12px;
-  font-weight: bold;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .probability-badge.low {
-  background: #edf0f4;
-  color: #64748b;
+  background: #e8eef5;
+  color: #52677d;
 }
 
 .probability-badge.medium {
@@ -489,38 +486,51 @@
   color: #16804a;
 }
 
-.probability-track {
-  width: 100%;
-  height: 11px;
-  background: #e2e8f0;
-  border-radius: 20px;
-  overflow: hidden;
-}
-
-.probability-fill {
-  height: 100%;
-  border-radius: 20px;
-  transition: width 0.2s ease;
-}
-
-.probability-fill.low {
-  background: #94a3b8;
-}
-
-.probability-fill.medium {
-  background: #e5a323;
-}
-
-.probability-fill.high {
-  background: #16a36a;
-}
-
 .probability-slider {
   display: block;
-  width: 100%;
-  margin: 17px 0 8px;
+  width: 100% !important;
+  max-width: none !important;
+  height: 12px;
+  margin: 16px 0 10px;
+  padding: 0;
+  box-sizing: border-box;
+  border: none;
+  border-radius: 10px;
+  appearance: none;
+  -webkit-appearance: none;
   cursor: pointer;
-  accent-color: #174a75;
+  background: linear-gradient(
+    to right,
+    #246b9e 0%,
+    #246b9e var(--probability),
+    #dce5ef var(--probability),
+    #dce5ef 100%
+  );
+}
+
+.probability-slider::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
+  background: #246b9e;
+  border: 3px solid #ffffff;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
+}
+
+.probability-slider::-moz-range-thumb {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #246b9e;
+  border: 3px solid #ffffff;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
+}
+
+.probability-slider:focus-visible {
+  outline: 3px solid rgba(36, 107, 158, 0.2);
+  outline-offset: 5px;
 }
 
 .probability-scale {
@@ -530,6 +540,7 @@
   color: #718096;
   font-size: 12px;
 }
+
 
 /* =====================================
    FOLLOW-UP INFORMATION
@@ -772,15 +783,6 @@
   position: relative;
 }
 
-.sidebar-brand::after {
-  content: "";
-  display: block;
-  width: 48px;
-  height: 3px;
-  margin-top: 17px;
-  background: #8dc5e8;
-  border-radius: 10px;
-}
 
 .sidebar-brand h2 {
   color: #ffffff;
@@ -815,13 +817,538 @@
   }
 }
 
+/* Force rounded visitor form fields */
+
+.dashboard .visitor-form-section .visitor-entry-form input:not([type="checkbox"]),
+.dashboard .visitor-form-section .visitor-entry-form select,
+.dashboard .visitor-form-section .visitor-entry-form textarea {
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 12px !important;
+  padding: 12px 15px !important;
+  background-color: #ffffff !important;
+  color: #243447 !important;
+  outline: none;
+}
+
+.dashboard .visitor-form-section .visitor-entry-form input:focus,
+.dashboard .visitor-form-section .visitor-entry-form select:focus,
+.dashboard .visitor-form-section .visitor-entry-form textarea:focus {
+  border-color: #2876a8 !important;
+  box-shadow: 0 0 0 3px rgba(40, 118, 168, 0.12) !important;
+}
+
+/* Force rounded visitor form fields */
+
+.dashboard .visitor-form-section .visitor-entry-form input:not([type="checkbox"]),
+.dashboard .visitor-form-section .visitor-entry-form select,
+.dashboard .visitor-form-section .visitor-entry-form textarea {
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 12px !important;
+  padding: 12px 15px !important;
+  background-color: #ffffff !important;
+  color: #243447 !important;
+  outline: none;
+}
+
+.dashboard .visitor-form-section .visitor-entry-form input:focus,
+.dashboard .visitor-form-section .visitor-entry-form select:focus,
+.dashboard .visitor-form-section .visitor-entry-form textarea:focus {
+  border-color: #2876a8 !important;
+  box-shadow: 0 0 0 3px rgba(40, 118, 168, 0.12) !important;
+}
+/* VISITOR CARD SPACING */
+.visitor-card > p {
+  margin: 0 0 10px;
+  line-height: 1.5;
+}
+
+.visitor-card > h3 {
+  margin-bottom: 16px;
+}
+
+/* PROBABILITY PANEL */
+.visitor-card .probability-panel {
+  margin-top: 16px;
+  margin-bottom: 18px;
+  padding: 16px 18px;
+}
+
+.visitor-card .probability-panel h4 {
+  margin: 0 0 14px;
+  font-size: 15px;
+}
+
+.visitor-card .probability-panel input[type="range"] {
+  display: block;
+  width: 100%;
+  max-width: 450px;
+  accent-color: #174a75;
+  cursor: pointer;
+}
+
+/* FOLLOW-UP CONTROLS */
+.visitor-card > label {
+  display: block;
+  margin: 12px 0 7px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #34495e;
+}
+
+.visitor-card > label input[type="checkbox"] {
+  margin-right: 9px;
+  accent-color: #174a75;
+}
+
+.visitor-card > input[type="date"],
+.visitor-card > textarea {
+  display: block;
+  width: 100%;
+  max-width: 550px;
+  padding: 11px 12px;
+  margin-bottom: 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  background: #ffffff;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+}
+
+.visitor-card > textarea {
+  min-height: 75px;
+  resize: vertical;
+}
+
+/* EXPORT BUTTON */
+.visitor-heading > button {
+  padding: 10px 16px;
+  background: #174a75;
+  color: white;
+  border: none;
+  border-radius: 7px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.visitor-heading > button:hover {
+  background: #123b5e;
+}
+/* COMPACT OVERVIEW VISITOR CARDS */
+
+.overview-visitors .visitor-list {
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.overview-visitors .visitor-card {
+  padding: 18px 20px;
+}
+
+.overview-visitors .visitor-card h3 {
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+
+.overview-visitors .visitor-card > p {
+  margin: 0 0 7px;
+  line-height: 1.4;
+  font-size: 14px;
+}
+
+.overview-visitors .visitor-card > button {
+  margin-top: 5px;
+}
+
+.overview-visitors .probability-panel {
+  margin-top: 14px;
+  margin-bottom: 14px;
+  padding: 14px 16px;
+}
+/* REDUCE PROBABILITY BOX SIZE */
+.overview-visitors .probability-panel {
+  padding: 10px 15px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.overview-visitors .probability-panel h4 {
+  margin-bottom: 8px;
+}
+
+.overview-visitors .probability-panel input[type="range"] {
+  margin: 6px 0;
+}
+/* MAKE OVERVIEW PROBABILITY BOX NARROWER */
+.overview-visitors .visitor-card .probability-panel {
+  width: 80%;
+  max-width: 1000px;
+}
+
+@media (max-width: 700px) {
+  .overview-visitors .visitor-card .probability-panel {
+    width: 100%;
+  }
+}
+
+/* Sidebar company branding */
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 22px 18px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.sidebar-brand-mark {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+
+.sidebar-brand-text p {
+  margin: 4px 0 0;
+  color: #b8d5ed;
+  font-size: 11px;
+  letter-spacing: 3px;
+}
+
+.sidebar-brand-text {
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.sidebar-brand-text h2 {
+  font-size: 15px;
+  white-space: nowrap;
+  letter-spacing: 0.5px;
+}
+
+.sidebar-brand-mark {
+  font-size: 14px;
+  letter-spacing: 0.5px;
+}
+
+.sidebar-brand-text p {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 7px;
+}
+
+.sidebar-brand-text p::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 3px;
+  background: #3498db;
+  border-radius: 3px;
+}
+
+/* SIDEBAR NAVIGATION POLISH */
+
+.sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 12px;
+}
+
+.sidebar .menu-item {
+  width: 100%;
+  padding: 12px 14px;
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  color: #d5e3ef;
+  text-align: left;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.sidebar .menu-item:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.sidebar .menu-item.active {
+  background: #287bb5;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* SIDEBAR ICON SPACING */
+
+.sidebar .menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sidebar .menu-item svg {
+  flex-shrink: 0;
+}
+/* SIDEBAR EMPLOYEE PROFILE */
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-profile {
+  margin-top: auto;
+  padding: 18px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.sidebar-profile-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+
+.sidebar-profile-info strong {
+  color: #ffffff;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.sidebar-profile-info span {
+  color: #b8d5ed;
+  font-size: 12px;
+}
+
+.sidebar-profile button {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 7px;
+  background: transparent;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.sidebar-profile button:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* NEW VISITOR FORM - INPUT DESIGN */
+
+.visitor-entry-form > input:not([type="checkbox"]),
+.visitor-entry-form > select,
+.visitor-entry-form > textarea {
+  width: 100%;
+  min-height: 46px;
+  padding: 12px 15px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #ffffff;
+  font-family: Arial, sans-serif;
+  font-size: 15px;
+  box-sizing: border-box;
+}
+
+.visitor-entry-form > textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.visitor-entry-form > input:focus,
+.visitor-entry-form > select:focus,
+.visitor-entry-form > textarea:focus {
+  outline: none;
+  border-color: #2876a8;
+  box-shadow: 0 0 0 3px rgba(40, 118, 168, 0.12);
+}
+
+/* SIMPLE FORM BUTTONS */
+
+.visitor-entry-form button[type="submit"] {
+  width: fit-content;
+  min-width: 150px;
+  padding: 11px 22px;
+  background: #174a75;
+  color: #ffffff;
+  border: none;
+  border-radius: 7px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.visitor-entry-form button[type="submit"]:hover {
+  background: #123b5e;
+}
+
+.visitor-entry-form button[type="submit"]:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+
 /* =====================================
-   NEW VISITOR INPUT CORNERS
-   Changes only the corner shape
+   VISITOR SEARCH AND FILTERS
 ===================================== */
 
-.dashboard .visitor-entry-form input:not([type="checkbox"]),
-.dashboard .visitor-entry-form select,
-.dashboard .visitor-entry-form textarea {
-  border-radius: 8px !important;
+.visitor-filters {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  width: 100%;
+  margin: 14px 0 22px;
 }
+
+.visitor-filters select {
+  width: 100%;
+  min-width: 0;
+  height: 44px;
+  padding: 0 34px 0 12px;
+  border: 1px solid #dce5ef;
+  border-radius: 8px;
+  background-color: #f5f8fc;
+  color: #334155;
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.visitor-filters select:hover {
+  border-color: #9bb6cc;
+}
+
+.visitor-filters select:focus {
+  outline: none;
+  border-color: #2876a8;
+  box-shadow: 0 0 0 3px rgba(40, 118, 168, 0.10);
+}
+
+@media (max-width: 1000px) {
+  .visitor-filters {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .visitor-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+
+/* =====================================
+   ORDERS & CUSTOMER FEEDBACK
+===================================== */
+
+.orders-feedback-section .visitor-card {
+  border: 1px solid #dce5ee;
+  border-radius: 14px;
+  padding: 24px;
+  margin-bottom: 18px;
+}
+
+.orders-feedback-section .visitor-card h3 {
+  color: #174a75;
+  font-size: 20px;
+  margin-bottom: 12px;
+}
+
+.orders-feedback-section .visitor-card h4 {
+  color: #34495e;
+  font-size: 16px;
+  margin: 18px 0 12px;
+}
+
+.orders-feedback-section .visitor-card textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #d6dee7;
+  border-radius: 9px;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  resize: vertical;
+  min-height: 75px;
+}
+
+.orders-feedback-section .visitor-card textarea:focus {
+  outline: none;
+  border-color: #2876a8;
+  box-shadow: 0 0 0 3px rgba(40, 118, 168, 0.10);
+}
+
+.orders-feedback-section .satisfaction-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.orders-feedback-section .satisfaction-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-width: 90px;
+  padding: 12px 10px;
+  background: #f7f9fc;
+  border: 1px solid #dce5ee;
+  border-radius: 12px;
+  color: #34495e;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.orders-feedback-section .satisfaction-option span {
+  font-size: 28px;
+}
+
+.orders-feedback-section .satisfaction-option small {
+  font-size: 12px;
+}
+
+.orders-feedback-section .satisfaction-option:hover {
+  border-color: #2876a8;
+  background: #edf5fb;
+}
+
+.orders-feedback-section .satisfaction-option.selected {
+  border: 2px solid #174a75;
+  background: #e8f2fa;
+  color: #174a75;
+  font-weight: 600;
+}
+
+.orders-feedback-section input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  accent-color: #174a75;
+  cursor: pointer;
+}
+
+@media (max-width: 600px) {
+  .orders-feedback-section .satisfaction-options {
+    gap: 8px;
+  }
+
+  .orders-feedback-section .satisfaction-option {
+    min-width: 75px;
+    flex: 1;
+  }
+}
+

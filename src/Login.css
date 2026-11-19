@@ -24,8 +24,8 @@
 /* PMEC image in the upper-left corner */
 .login-pmec {
   position: absolute;
-  top: 18px;
-  left: 25px;
+  top: 45px;
+  left: 100px;
   width: 500px;
   max-height: 240px;
   object-fit: contain;
