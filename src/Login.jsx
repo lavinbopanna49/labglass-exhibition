@@ -3,7 +3,7 @@ import { useState } from "react";
 import { supabase } from "./supabase";
 import "./Login.css";
 
-function Login({ onLogin, onBack }) {
+function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -14,60 +14,74 @@ function Login({ onLogin, onBack }) {
     setLoading(true);
     setError("");
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
 
-    setLoading(false);
-
-    if (error) {
-      setError(error.message);
-      return;
+      if (error) setError(error.message);
+    } catch {
+      setError("Unable to sign in. Please try again.");
+    } finally {
+      setLoading(false);
     }
-
-    onLogin(data.user);
   }
 
   return (
-    <div className="login-page">
-      <form className="login-card" onSubmit={handleLogin}>
-        <div className="login-brand">
-          <h1>H. S. MARTIN</h1>
-          <h2>INDIA</h2>
-        </div>
+    <main className="login-page">
+      <img
+        className="login-background"
+        src="/src/assets/bg.jpg"
+        alt=""
+      />
 
-        <h3>Employee Login</h3>
+      <img
+        className="login-pmec"
+        src="/src/assets/pmec.jpg"
+        alt="PMEC"
+      />
 
-        <p>Sign in to access the exhibition dashboard.</p>
+      <div className="login-overlay">
+        <form className="login-card" onSubmit={handleLogin}>
+          <div className="login-brand">
+            <img
+              src="/src/assets/labglass_logo.jpg"
+              alt="H. S. Martin India"
+            />
+          </div>
 
-        <label>Email Address</label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
+          <h3>User Login</h3>
+          <p>Sign in to access the exhibition dashboard.</p>
 
-        <label>Password</label>
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
+          <label htmlFor="email">Email Address</label>
+          <input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter your email"
+            required
+          />
 
-        {error && <p className="Login-error">{error}</p>}
+          <label htmlFor="password">Password</label>
+          <input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Enter your password"
+            required
+          />
 
-        <button type="submit" disabled={loading}>
-          {loading ? "Signing in..." : "Login"}
-        </button>
+          {error && <p className="login-error">{error}</p>}
 
-        <button type="button" onClick={onBack}>
-          Back to Visitor Registration
-        </button>
-      </form>
-    </div>
+          <button type="submit" disabled={loading}>
+            {loading ? "Signing in..." : "Login"}
+          </button>
+        </form>
+      </div>
+    </main>
   );
 }
 

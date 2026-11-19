@@ -1,8 +1,46 @@
-
 import { useState, useEffect } from "react";
 import ExcelJS from "exceljs";
 import "./Dashboard.css";
 import { supabase } from "./supabase";
+
+const initialForm = {
+  name: "",
+  company: "",
+  designation: "",
+  phone: "",
+  email: "",
+  country: "",
+  state: "",
+  interests: [],
+  requirements: "",
+};
+
+const products = [
+  "Jacketed Glass Reactors (100 mL to 100 L), including Double-Jacketed (Vacuum-Insulated) Systems",
+  "Glass Wiped Film Evaporators",
+  "Short Path Distillation Systems",
+  "Glass Filter Reactors and Nutsche Filter Units (1 L to 20 L)",
+  "Continuous Stirred Tank Reactor (CSTR) Systems",
+  "Photochemical Reactors",
+  "Fractional Distillation Systems with Insulated Columns and Structured Packing",
+  "Jointed Laboratory Glassware, including Adapters, Condensers, Flasks, Columns, and Custom-Designed Items",
+  "Glassware Spares for Rotary Evaporators (Compatible with All Major Brands)",
+  "Schlenk Line Glassware, including Manifolds, Flasks, and Tubes",
+  "Other Glass Items",
+];
+
+const states = [
+  "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar",
+  "Chhattisgarh", "Goa", "Gujarat", "Haryana",
+  "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala",
+  "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya",
+  "Mizoram", "Nagaland", "Odisha", "Punjab", "Rajasthan",
+  "Sikkim", "Tamil Nadu", "Telangana", "Tripura",
+  "Uttar Pradesh", "Uttarakhand", "West Bengal",
+  "Andaman and Nicobar Islands", "Chandigarh",
+  "Dadra and Nagar Haveli and Daman and Diu", "Delhi",
+  "Jammu and Kashmir", "Ladakh", "Lakshadweep", "Puducherry",
+];
 
 function getProbabilityLevel(value) {
   if (value >= 70) return "High";
@@ -10,7 +48,7 @@ function getProbabilityLevel(value) {
   return "Low";
 }
 
-function Dashboard() {
+export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("Overview");
   const [search, setSearch] = useState("");
   const [visitors, setVisitors] = useState([]);
@@ -18,9 +56,33 @@ function Dashboard() {
   const [error, setError] = useState("");
   const [exporting, setExporting] = useState(false);
 
-  // LIVE DATABASE CONNECTION
+  const [user, setUser] = useState(null);
+  const [userRole, setUserRole] = useState("employee");
+
+  const [form, setForm] = useState(initialForm);
+  const [saving, setSaving] = useState(false);
+  const [editingVisitor, setEditingVisitor] = useState(null);
+
   useEffect(() => {
     let mounted = true;
+
+    async function loadUser() {
+      const { data: userData } = await supabase.auth.getUser();
+      const { data: roleData, error: roleError } =
+        await supabase.rpc("get_user_role");
+
+      if (!mounted) return;
+
+      setUser(userData?.user || null);
+
+      if (roleError) {
+        console.error("Could not load user role:", roleError.message);
+      } else {
+        setUserRole(roleData || "employee");
+      }
+    }
+
+    loadUser();
 
     async function fetchVisitors() {
       const { data, error } = await supabase
@@ -34,34 +96,13 @@ function Dashboard() {
         setError(error.message);
       } else {
         setError("");
-
-        setVisitors((current) => {
-          const currentById = new Map(
-            current.map((visitor) => [visitor.id, visitor])
-          );
-
-          const fetchedIds = new Set(
-            (data || []).map((visitor) => visitor.id)
-          );
-
-          const merged = (data || []).map(
-            (visitor) =>
-              currentById.get(visitor.id) || visitor
-          );
-
-          const newRecords = current.filter(
-            (visitor) => !fetchedIds.has(visitor.id)
-          );
-
-          return [...merged, ...newRecords].sort(
-            (a, b) =>
-              new Date(b.created_at) - new Date(a.created_at)
-          );
-        });
+        setVisitors(data || []);
       }
 
       setLoading(false);
     }
+
+    fetchVisitors();
 
     const channel = supabase
       .channel("visitors-live-updates")
@@ -72,62 +113,11 @@ function Dashboard() {
           schema: "public",
           table: "visitors",
         },
-        (payload) => {
-          if (!mounted) return;
-
-          // NEW VISITOR
-          if (payload.eventType === "INSERT") {
-            setVisitors((current) => {
-              if (
-                current.some(
-                  (visitor) => visitor.id === payload.new.id
-                )
-              ) {
-                return current;
-              }
-
-              return [payload.new, ...current];
-            });
-          }
-
-          // UPDATED VISITOR
-          if (payload.eventType === "UPDATE") {
-            setVisitors((current) =>
-              current.map((visitor) =>
-                visitor.id === payload.new.id
-                  ? payload.new
-                  : visitor
-              )
-            );
-          }
-
-          // DELETED VISITOR
-          if (payload.eventType === "DELETE") {
-            setVisitors((current) =>
-              current.filter(
-                (visitor) => visitor.id !== payload.old.id
-              )
-            );
-          }
-        }
-      )
-      .subscribe((status) => {
-        if (!mounted) return;
-
-        if (status === "SUBSCRIBED") {
+        () => {
           fetchVisitors();
         }
-
-        if (
-          status === "CHANNEL_ERROR" ||
-          status === "TIMED_OUT"
-        ) {
-          setError(
-            "Live connection failed. Please check your internet connection."
-          );
-          setLoading(false);
-        }
-      });
+      )
+      .subscribe();
 
     return () => {
       mounted = false;
@@ -135,7 +125,6 @@ function Dashboard() {
     };
   }, []);
 
-  // LOGOUT
   async function handleLogout() {
     const { error } = await supabase.auth.signOut();
 
@@ -144,7 +133,111 @@ function Dashboard() {
     }
   }
 
-  // UPDATE VISITOR
+  function handleFormChange(event) {
+    const { name, value } = event.target;
+    setForm((current) => ({ ...current, [name]: value }));
+  }
+
+  function handleInterest(product) {
+    setForm((current) => ({
+      ...current,
+      interests: current.interests.includes(product)
+        ? current.interests.filter((item) => item !== product)
+        : [...current.interests, product],
+    }));
+  }
+
+  async function handleSaveVisitor(event) {
+    event.preventDefault();
+
+    const trimmedName = form.name.trim();
+
+    if (!trimmedName) {
+      alert("Please enter the visitor's name.");
+      return;
+    }
+
+    if (!user) {
+      alert("Your login session could not be found. Please log in again.");
+      return;
+    }
+
+    setSaving(true);
+
+    const visitorData = {
+      name: trimmedName,
+      company: form.company,
+      designation: form.designation,
+      phone: form.phone,
+      email: form.email,
+      country: form.country,
+      state: form.state,
+      interests: form.interests,
+      requirements: form.requirements,
+    };
+
+    let result;
+
+    if (editingVisitor) {
+      result = await supabase
+        .from("visitors")
+        .update(visitorData)
+        .eq("id", editingVisitor.id);
+    } else {
+      result = await supabase.from("visitors").insert({
+        ...visitorData,
+        employee_id: user.id,
+        consent_to_contact: false,
+      });
+    }
+
+    setSaving(false);
+
+    if (result.error) {
+      alert("Could not save visitor: " + result.error.message);
+      return;
+    }
+
+    alert(
+      editingVisitor
+        ? "Visitor details updated successfully."
+        : "New visitor saved successfully."
+    );
+
+    setForm(initialForm);
+    setEditingVisitor(null);
+    setActiveTab("All Visitors");
+
+    const { data } = await supabase
+      .from("visitors")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (data) setVisitors(data);
+  }
+
+  function startEdit(visitor) {
+    setEditingVisitor(visitor);
+    setForm({
+      name: visitor.name || "",
+      company: visitor.company || "",
+      designation: visitor.designation || "",
+      phone: visitor.phone || "",
+      email: visitor.email || "",
+      country: visitor.country || "",
+      state: visitor.state || "",
+      interests: visitor.interests || [],
+      requirements: visitor.requirements || "",
+    });
+    setActiveTab("Edit Visitor");
+  }
+
+  function cancelEdit() {
+    setEditingVisitor(null);
+    setForm(initialForm);
+    setActiveTab("All Visitors");
+  }
+
   async function updateVisitor(visitorId, updates) {
     const { error } = await supabase
       .from("visitors")
@@ -167,15 +260,11 @@ function Dashboard() {
     return true;
   }
 
-  // CHANGE PROBABILITY
   function changeProbability(visitorId, value) {
     setVisitors((current) =>
       current.map((visitor) =>
         visitor.id === visitorId
-          ? {
-              ...visitor,
-              customer_probability: Number(value),
-            }
+          ? { ...visitor, customer_probability: Number(value) }
           : visitor
       )
     );
@@ -187,7 +276,6 @@ function Dashboard() {
     });
   }
 
-  // EXCEL EXPORT
   async function exportToExcel() {
     if (visitors.length === 0) {
       alert("There are no visitor records to export.");
@@ -198,68 +286,37 @@ function Dashboard() {
 
     try {
       const workbook = new ExcelJS.Workbook();
-
       workbook.creator = "H. S. Martin India";
       workbook.created = new Date();
 
-      function prepareSheet(sheet, columns, rows) {
-        sheet.columns = columns;
+      const sheet = workbook.addWorksheet("All Visitors");
 
-        rows.forEach((row) => sheet.addRow(row));
+      sheet.columns = [
+        { header: "Name", key: "name", width: 25 },
+        { header: "Company", key: "company", width: 25 },
+        { header: "Designation", key: "designation", width: 20 },
+        { header: "Phone", key: "phone", width: 18 },
+        { header: "Email", key: "email", width: 28 },
+        { header: "Country", key: "country", width: 18 },
+        { header: "State / UT", key: "state", width: 22 },
+        { header: "Product Interests", key: "interests", width: 45 },
+        { header: "Requirements", key: "requirements", width: 35 },
+        { header: "Probability", key: "probability", width: 15 },
+        { header: "Follow-up Required", key: "followup", width: 18 },
+        { header: "Follow-up Date", key: "date", width: 18 },
+        { header: "Follow-up Notes", key: "notes", width: 35 },
+        { header: "Registration Date", key: "created", width: 25 },
+      ];
 
-        sheet.getRow(1).font = {
-          bold: true,
-          color: { argb: "FFFFFFFF" },
-        };
-
-        sheet.getRow(1).fill = {
-          type: "pattern",
-          pattern: "solid",
-          fgColor: { argb: "FF174A75" },
-        };
-
-        sheet.views = [{ state: "frozen", ySplit: 1 }];
-
-        sheet.autoFilter = {
-          from: "A1",
-          to: `${String.fromCharCode(64 + columns.length)}1`,
-        };
-
-        sheet.columns.forEach((column) => {
-          column.width = Math.min(
-            Math.max(column.header.length + 5, 15),
-            35
-          );
-        });
-      }
-
-      // ALL VISITORS SHEET
-      const allVisitors = workbook.addWorksheet("All Visitors");
-
-      prepareSheet(
-        allVisitors,
-        [
-          { header: "Name", key: "name" },
-          { header: "Company", key: "company" },
-          { header: "Designation", key: "designation" },
-          { header: "Phone", key: "phone" },
-          { header: "Email", key: "email" },
-          { header: "Country", key: "country" },
-          { header: "Product Interests", key: "interests" },
-          { header: "Requirements", key: "requirements" },
-          { header: "Probability of Ordering", key: "probability" },
-          { header: "Follow-up Required", key: "followup" },
-          { header: "Follow-up Date", key: "date" },
-          { header: "Follow-up Notes", key: "notes" },
-          { header: "Registration Date", key: "created" },
-        ],
-        visitors.map((v) => ({
+      visitors.forEach((v) => {
+        sheet.addRow({
           name: v.name,
           company: v.company,
           designation: v.designation || "",
           phone: v.phone,
           email: v.email || "",
           country: v.country || "",
+          state: v.state || "",
           interests: (v.interests || []).join(", "),
           requirements: v.requirements || "",
           probability: `${v.customer_probability || 0}%`,
@@ -269,72 +326,33 @@ function Dashboard() {
           created: v.created_at
             ? new Date(v.created_at).toLocaleString()
             : "",
-        }))
-      );
+        });
+      });
 
-      // PROBABILITY OF ORDERING SHEET
-      const enquiries = workbook.addWorksheet(
-        "Probability of Ordering"
-      );
+      sheet.getRow(1).font = {
+        bold: true,
+        color: { argb: "FFFFFFFF" },
+      };
 
-      prepareSheet(
-        enquiries,
-        [
-          { header: "Name", key: "name" },
-          { header: "Company", key: "company" },
-          { header: "Phone", key: "phone" },
-          { header: "Email", key: "email" },
-          { header: "Probability of Ordering", key: "probability" },
-          { header: "Probability Level", key: "level" },
-        ],
-        visitors.map((v) => ({
-          name: v.name,
-          company: v.company,
-          phone: v.phone,
-          email: v.email || "",
-          probability: `${v.customer_probability || 0}%`,
-          level: getProbabilityLevel(
-            v.customer_probability || 0
-          ),
-        }))
-      );
+      sheet.getRow(1).fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FF174A75" },
+      };
 
-      // FOLLOW-UPS SHEET
-      const followups = workbook.addWorksheet("Follow-ups");
-
-      prepareSheet(
-        followups,
-        [
-          { header: "Name", key: "name" },
-          { header: "Company", key: "company" },
-          { header: "Phone", key: "phone" },
-          { header: "Email", key: "email" },
-          { header: "Follow-up Required", key: "required" },
-          { header: "Follow-up Date", key: "date" },
-          { header: "Follow-up Notes", key: "notes" },
-        ],
-        visitors
-          .filter((v) => v.follow_up_required)
-          .map((v) => ({
-            name: v.name,
-            company: v.company,
-            phone: v.phone,
-            email: v.email || "",
-            required: "Yes",
-            date: v.follow_up_date || "",
-            notes: v.follow_up_notes || "",
-          }))
-      );
+      sheet.views = [{ state: "frozen", ySplit: 1 }];
+      sheet.autoFilter = {
+        from: "A1",
+        to: "N1",
+      };
 
       const buffer = await workbook.xlsx.writeBuffer();
-
       const blob = new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
 
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
-
       link.href = url;
       link.download = `HSMartin_Exhibition_Visitors_${new Date()
         .toISOString()
@@ -343,7 +361,6 @@ function Dashboard() {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-
       URL.revokeObjectURL(url);
 
       alert("Excel workbook exported successfully!");
@@ -354,30 +371,29 @@ function Dashboard() {
     }
   }
 
-  // DASHBOARD COUNTS
   const companyCount = new Set(
-    visitors.map((visitor) => visitor.company).filter(Boolean)
+    visitors.map((v) => v.company).filter(Boolean)
   ).size;
 
-  const countryCount = new Set(
-    visitors.map((visitor) => visitor.country).filter(Boolean)
+  const stateCount = new Set(
+    visitors.map((v) => v.state).filter(Boolean)
   ).size;
 
   const productCount = visitors.reduce(
-    (total, visitor) =>
-      total + (visitor.interests || []).length,
+    (total, visitor) => total + (visitor.interests || []).length,
     0
   );
 
-  // SEARCH
   const filteredVisitors = visitors.filter((visitor) => {
-    const searchText = search.toLowerCase();
+    const term = search.toLowerCase();
 
     return (
-      (visitor.name || "").toLowerCase().includes(searchText) ||
-      (visitor.company || "").toLowerCase().includes(searchText) ||
-      (visitor.email || "").toLowerCase().includes(searchText) ||
-      (visitor.phone || "").toLowerCase().includes(searchText)
+      (visitor.name || "").toLowerCase().includes(term) ||
+      (visitor.company || "").toLowerCase().includes(term) ||
+      (visitor.email || "").toLowerCase().includes(term) ||
+      (visitor.phone || "").toLowerCase().includes(term) ||
+      (visitor.country || "").toLowerCase().includes(term) ||
+      (visitor.state || "").toLowerCase().includes(term)
     );
   });
 
@@ -385,33 +401,143 @@ function Dashboard() {
     (visitor) => visitor.follow_up_required
   );
 
-  // PROBABILITY PANEL
-  function renderProbability(visitor) {
-    const probability = Number(
-      visitor.customer_probability || 0
-    );
+  function renderVisitorForm() {
+    return (
+      <section className="visitor-section">
+        <div className="visitor-heading">
+          <div>
+            <h2>{editingVisitor ? "Edit Visitor Details" : "Enter New Visitor"}</h2>
+            <p>
+              {editingVisitor
+                ? "Update the visitor's information below."
+                : "Enter the details collected from the exhibition visitor."}
+            </p>
+          </div>
+        </div>
 
-    const probabilityLevel = getProbabilityLevel(probability);
+        <form onSubmit={handleSaveVisitor} className="visitor-entry-form">
+          <label>Full Name *</label>
+          <input
+            name="name"
+            value={form.name}
+            onChange={handleFormChange}
+            required
+          />
+
+          <label>Company Name</label>
+          <input
+            name="company"
+            value={form.company}
+            onChange={handleFormChange}
+          />
+
+          <label>Designation</label>
+          <input
+            name="designation"
+            value={form.designation}
+            onChange={handleFormChange}
+          />
+
+          <label>Phone Number</label>
+          <input
+            name="phone"
+            type="tel"
+            value={form.phone}
+            onChange={handleFormChange}
+          />
+
+          <label>Email Address</label>
+          <input
+            name="email"
+            type="email"
+            value={form.email}
+            onChange={handleFormChange}
+          />
+
+          <label>Country</label>
+          <input
+            name="country"
+            value={form.country}
+            onChange={handleFormChange}
+            placeholder="Enter country"
+          />
+
+          <label>State / Union Territory</label>
+          <select
+            name="state"
+            value={form.state}
+            onChange={handleFormChange}
+          >
+            <option value="">Select State / UT</option>
+            {states.map((state) => (
+              <option value={state} key={state}>
+                {state}
+              </option>
+            ))}
+          </select>
+
+          <h3>Products Interested In</h3>
+          <p>Select all products the visitor is interested in.</p>
+
+          <div className="product-list">
+            {products.map((product) => (
+              <label className="product-option" key={product}>
+                <input
+                  type="checkbox"
+                  checked={form.interests.includes(product)}
+                  onChange={() => handleInterest(product)}
+                />
+                <span>{product}</span>
+              </label>
+            ))}
+          </div>
+
+          <label>Additional Requirements</label>
+          <textarea
+            name="requirements"
+            rows="4"
+            value={form.requirements}
+            onChange={handleFormChange}
+          />
+
+          <div style={{ display: "flex", gap: "10px", marginTop: "20px" }}>
+            <button type="submit" disabled={saving}>
+              {saving
+                ? "Saving..."
+                : editingVisitor
+                  ? "Save Changes"
+                  : "Save Visitor"}
+            </button>
+
+            {editingVisitor && (
+              <button type="button" onClick={cancelEdit}>
+                Cancel
+              </button>
+            )}
+          </div>
+        </form>
+      </section>
+    );
+  }
+
+  function renderProbability(visitor) {
+    const probability = Number(visitor.customer_probability || 0);
+    const level = getProbabilityLevel(probability);
 
     return (
       <div className="probability-panel">
         <div className="probability-heading">
           <h4>Probability of Ordering</h4>
-
-          <span
-            className={`probability-badge ${probabilityLevel.toLowerCase()}`}
-          >
-            {probabilityLevel}
+          <span className={`probability-badge ${level.toLowerCase()}`}>
+            {level}
           </span>
         </div>
 
-        <div className="probability-value">
-          {probability}%
-        </div>
+        <div className="probability-value">{probability}%</div>
 
         <div className="probability-track">
           <div
-            className={`probability-fill ${probabilityLevel.toLowerCase()}`}
+            className={`probability-fill ${level.toLowerCase()}`}
             style={{ width: `${probability}%` }}
           />
         </div>
@@ -424,9 +550,7 @@ function Dashboard() {
           step="5"
           value={probability}
           aria-label={`Probability of ordering for ${visitor.name}`}
-          onChange={(e) =>
-            changeProbability(visitor.id, e.target.value)
-          }
+          onChange={(e) => changeProbability(visitor.id, e.target.value)}
           onPointerUp={(e) =>
             saveProbability(visitor.id, e.currentTarget.value)
           }
@@ -443,7 +567,6 @@ function Dashboard() {
     );
   }
 
-  // FOLLOW-UP PANEL
   function renderFollowUp(visitor) {
     return (
       <div className="follow-up-panel">
@@ -459,14 +582,12 @@ function Dashboard() {
               })
             }
           />
-
           <span>Follow-up Required</span>
         </label>
 
         <div className="follow-up-fields">
           <div className="follow-up-field">
             <label>Follow-up Date</label>
-
             <input
               type="date"
               value={visitor.follow_up_date || ""}
@@ -480,7 +601,6 @@ function Dashboard() {
 
           <div className="follow-up-field">
             <label>Follow-up Notes</label>
-
             <textarea
               rows="3"
               value={visitor.follow_up_notes || ""}
@@ -489,10 +609,7 @@ function Dashboard() {
                 setVisitors((current) =>
                   current.map((item) =>
                     item.id === visitor.id
-                      ? {
-                          ...item,
-                          follow_up_notes: e.target.value,
-                        }
+                      ? { ...item, follow_up_notes: e.target.value }
                       : item
                   )
                 )
@@ -509,12 +626,8 @@ function Dashboard() {
     );
   }
 
-  // VISITOR CARD
   function renderVisitorCard(visitor, options = {}) {
-    const {
-      probability = true,
-      followUp = true,
-    } = options;
+    const { probability = true, followUp = true } = options;
 
     return (
       <div className="stat-card visitor-card" key={visitor.id}>
@@ -525,8 +638,17 @@ function Dashboard() {
         <p><strong>Phone:</strong> {visitor.phone}</p>
         <p><strong>Email:</strong> {visitor.email || "Not provided"}</p>
         <p><strong>Country:</strong> {visitor.country || "Not provided"}</p>
+        <p><strong>State / UT:</strong> {visitor.state || "Not provided"}</p>
         <p><strong>Interests:</strong> {(visitor.interests || []).join(", ") || "None selected"}</p>
         <p><strong>Requirements:</strong> {visitor.requirements || "None"}</p>
+
+        <button
+          type="button"
+          onClick={() => startEdit(visitor)}
+          style={{ marginTop: "10px" }}
+        >
+          Edit Visitor
+        </button>
 
         {probability && renderProbability(visitor)}
 
@@ -547,35 +669,26 @@ function Dashboard() {
     );
   }
 
-  // VISITOR LIST
   function renderVisitorList(list, options = {}) {
-    if (loading) {
-      return <p>Loading visitor records...</p>;
-    }
-
-    if (error) {
-      return <p>Could not load visitors: {error}</p>;
-    }
+    if (loading) return <p>Loading visitor records...</p>;
+    if (error) return <p>Could not load visitors: {error}</p>;
 
     if (list.length === 0) {
       return (
         <div className="empty-state">
           <h3>No visitors found</h3>
-          <p>Visitor registrations will appear here.</p>
+          <p>Visitor records will appear here when employees add them.</p>
         </div>
       );
     }
 
     return (
       <div className="visitor-list">
-        {list.map((visitor) =>
-          renderVisitorCard(visitor, options)
-        )}
+        {list.map((visitor) => renderVisitorCard(visitor, options))}
       </div>
     );
   }
 
-  // DASHBOARD DISPLAY
   return (
     <div className="dashboard">
       <aside className="sidebar">
@@ -585,23 +698,27 @@ function Dashboard() {
         </div>
 
         <nav>
-          {["Overview", "All Visitors", "Enquiries", "Follow-ups"].map(
-            (tab) => (
-              <button
-                type="button"
-                key={tab}
-                className={`menu-item ${
-                  activeTab === tab ? "active" : ""
-                }`}
-                onClick={() => {
-                  setActiveTab(tab);
-                  setSearch("");
-                }}
-              >
-                {tab}
-              </button>
-            )
-          )}
+          {[
+            "Overview",
+            "New Visitor",
+            "All Visitors",
+            "Enquiries",
+            "Follow-ups",
+          ].map((tab) => (
+            <button
+              type="button"
+              key={tab}
+              className={`menu-item ${activeTab === tab ? "active" : ""}`}
+              onClick={() => {
+                setActiveTab(tab);
+                setSearch("");
+                setEditingVisitor(null);
+                setForm(initialForm);
+              }}
+            >
+              {tab}
+            </button>
+          ))}
         </nav>
       </aside>
 
@@ -613,15 +730,19 @@ function Dashboard() {
           </div>
 
           <div>
-            <span className="admin-label">Employee Panel</span>
-
+            <span className="admin-label">
+              {userRole === "admin" ? "Admin Panel" : "Employee Panel"}
+            </span>
             <button type="button" onClick={handleLogout}>
               Logout
             </button>
           </div>
         </header>
 
-        {/* OVERVIEW */}
+        {activeTab === "New Visitor" && renderVisitorForm()}
+
+        {activeTab === "Edit Visitor" && renderVisitorForm()}
+
         {activeTab === "Overview" && (
           <>
             <section className="stats">
@@ -637,7 +758,7 @@ function Dashboard() {
 
               <div className="stat-card">
                 <p>States</p>
-                <h2>{countryCount}</h2>
+                <h2>{stateCount}</h2>
               </div>
 
               <div className="stat-card">
@@ -649,8 +770,8 @@ function Dashboard() {
             <section className="visitor-section">
               <div className="visitor-heading">
                 <div>
-                  <h2>Recent Registrations</h2>
-                  <p>Your latest exhibition visitors</p>
+                  <h2>Recent Visitors</h2>
+                  <p>Latest exhibition visitor records</p>
                 </div>
 
                 <button
@@ -671,13 +792,12 @@ function Dashboard() {
           </>
         )}
 
-        {/* ALL VISITORS */}
         {activeTab === "All Visitors" && (
           <section className="visitor-section">
             <div className="visitor-heading">
               <div>
-                <h2>All Registered Visitors</h2>
-                <p>View and manage complete visitor records</p>
+                <h2>All Visitors</h2>
+                <p>View and manage visitor records</p>
               </div>
 
               <button
@@ -693,7 +813,7 @@ function Dashboard() {
             <input
               className="search-box"
               type="text"
-              placeholder="Search by visitor, company, email or phone..."
+              placeholder="Search by visitor, company, email, phone, country or state..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -702,16 +822,12 @@ function Dashboard() {
           </section>
         )}
 
-        {/* ENQUIRIES */}
         {activeTab === "Enquiries" && (
           <section className="visitor-section">
             <div className="visitor-heading">
               <div>
                 <h2>Customer Enquiries</h2>
-                <p>
-                  Assess and update the probability of converting each
-                  visitor into a customer
-                </p>
+                <p>Assess the probability of converting visitors into customers.</p>
               </div>
             </div>
 
@@ -730,15 +846,12 @@ function Dashboard() {
           </section>
         )}
 
-        {/* FOLLOW-UPS */}
         {activeTab === "Follow-ups" && (
           <section className="visitor-section">
             <div className="visitor-heading">
               <div>
                 <h2>Follow-up Management</h2>
-                <p>
-                  Visitors marked for follow-up and their next actions
-                </p>
+                <p>Visitors marked for follow-up and their next actions.</p>
               </div>
             </div>
 
@@ -760,5 +873,3 @@ function Dashboard() {
     </div>
   );
 }
-
-export default Dashboard;

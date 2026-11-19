@@ -1,4 +1,8 @@
 
+/* =====================================
+   GLOBAL SETTINGS
+===================================== */
+
 * {
   box-sizing: border-box;
 }
@@ -6,24 +10,33 @@
 .dashboard {
   display: flex;
   min-height: 100vh;
+  width: 100%;
   background: #f3f6fa;
   color: #243447;
   font-family: Arial, sans-serif;
 }
 
+/* =====================================
+   SIDEBAR
+===================================== */
+
 .sidebar {
-  width: 240px;
+  width: 250px;
+  min-width: 250px;
   flex-shrink: 0;
   background: #173b5e;
   color: white;
   padding: 28px 18px;
 }
 
-.sidebar h2 {
-  margin-bottom: 5px;
+.sidebar-brand h2 {
+  margin: 0 0 5px;
+  font-size: 23px;
+  color: white;
 }
 
-.sidebar p {
+.sidebar-brand p {
+  margin: 0;
   color: #c4d5e5;
   font-size: 14px;
 }
@@ -36,23 +49,32 @@
 }
 
 .menu-item {
+  display: block;
+  width: 100%;
   background: transparent;
   color: white;
   text-align: left;
-  padding: 13px;
+  padding: 13px 15px;
   border: none;
   border-radius: 6px;
   cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
 }
 
-.menu-item:hover {
+.menu-item:hover,
+.menu-item.active {
   background: #28577f;
 }
 
+/* =====================================
+   MAIN DASHBOARD
+===================================== */
+
 .dashboard-main {
   flex: 1;
-  padding: 35px;
   min-width: 0;
+  padding: 35px;
 }
 
 .dashboard-header {
@@ -64,7 +86,26 @@
 }
 
 .dashboard-header h1 {
-  margin-bottom: 8px;
+  margin: 0 0 8px;
+  color: #243447;
+  font-size: 28px;
+}
+
+.dashboard-header p {
+  margin: 0;
+  color: #718096;
+  font-size: 14px;
+}
+
+.dashboard-header > div:first-child {
+  text-align: left;
+  margin-right: auto;
+}
+
+.dashboard-header > div:last-child {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .admin-label {
@@ -74,12 +115,29 @@
   padding: 10px 15px;
   border-radius: 20px;
   font-size: 13px;
-  margin-right: 10px;
+  white-space: nowrap;
 }
+
+.dashboard-header button {
+  padding: 10px 16px;
+  background: #64748b;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.dashboard-header button:hover {
+  background: #475569;
+}
+
+/* =====================================
+   DASHBOARD STATISTICS
+===================================== */
 
 .stats {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 18px;
   margin-bottom: 30px;
 }
@@ -100,7 +158,12 @@
   margin-bottom: 0;
 }
 
+/* =====================================
+   VISITOR SECTIONS
+===================================== */
+
 .visitor-section {
+  width: 100%;
   background: white;
   padding: 25px;
   border-radius: 10px;
@@ -114,6 +177,22 @@
   gap: 15px;
 }
 
+.visitor-heading > div:first-child {
+  text-align: left;
+  margin-right: auto;
+}
+
+.visitor-heading h2 {
+  margin: 0 0 8px;
+  color: #243447;
+}
+
+.visitor-heading p {
+  margin: 0;
+  color: #718096;
+  font-size: 14px;
+}
+
 .export-button {
   padding: 11px 16px;
   background: #174a75;
@@ -123,17 +202,23 @@
   cursor: pointer;
 }
 
+.export-button:hover {
+  background: #123b5e;
+}
+
 .export-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
 .search-box {
+  display: block;
   width: 100%;
   padding: 13px;
   margin-top: 22px;
   border: 1px solid #d6dee7;
   border-radius: 6px;
+  font-size: 14px;
 }
 
 .empty-state {
@@ -142,7 +227,10 @@
   color: #718096;
 }
 
-/* Visitor cards */
+/* =====================================
+   VISITOR CARDS
+===================================== */
+
 .visitor-list {
   display: flex;
   flex-direction: column;
@@ -173,7 +261,183 @@
   margin: 22px 0;
 }
 
-/* Customer probability */
+.visitor-card > button {
+  padding: 9px 15px;
+  background: #174a75;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* =====================================
+   NEW VISITOR / EDIT VISITOR FORM
+===================================== */
+
+.visitor-form-section {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.visitor-entry-form {
+  width: 100%;
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px 25px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  min-width: 0;
+}
+
+.form-field label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #34495e;
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid #ccd5df;
+  border-radius: 7px;
+  background: #ffffff;
+  color: #243447;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+}
+
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus {
+  outline: none;
+  border-color: #174a75;
+  box-shadow: 0 0 0 3px rgba(23, 74, 117, 0.1);
+}
+
+/* =====================================
+   PRODUCT SELECTION
+===================================== */
+
+.form-products {
+  width: 100%;
+  padding: 22px;
+  background: #f7f9fc;
+  border: 1px solid #e1e7ef;
+  border-radius: 10px;
+}
+
+.form-products h3 {
+  margin: 0 0 8px;
+  color: #174a75;
+  font-size: 19px;
+}
+
+.form-products > p {
+  margin: 0 0 20px;
+  color: #718096;
+  font-size: 14px;
+}
+
+.product-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 15px 22px;
+}
+
+.product-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+  line-height: 1.5;
+  font-size: 14px;
+  color: #34495e;
+  cursor: pointer;
+}
+
+.product-option input {
+  width: 17px;
+  height: 17px;
+  margin: 3px 0 0;
+  flex-shrink: 0;
+  accent-color: #174a75;
+  cursor: pointer;
+}
+
+.product-option span {
+  flex: 1;
+}
+
+/* =====================================
+   ADDITIONAL REQUIREMENTS
+===================================== */
+
+.requirements-field {
+  width: 100%;
+}
+
+.requirements-field textarea {
+  resize: vertical;
+  min-height: 110px;
+}
+
+/* =====================================
+   FORM BUTTONS
+===================================== */
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 5px;
+}
+
+.form-actions button {
+  padding: 12px 24px;
+  background: #174a75;
+  color: white;
+  border: none;
+  border-radius: 7px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.form-actions button:hover {
+  background: #123b5e;
+}
+
+.form-actions button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.form-actions .cancel-button {
+  background: #64748b;
+}
+
+.form-actions .cancel-button:hover {
+  background: #475569;
+}
+
+/* =====================================
+   CUSTOMER PROBABILITY
+===================================== */
+
 .probability-panel {
   width: 100%;
   margin-top: 22px;
@@ -225,7 +489,6 @@
   color: #16804a;
 }
 
-/* Visual progress bar */
 .probability-track {
   width: 100%;
   height: 11px;
@@ -252,7 +515,6 @@
   background: #16a36a;
 }
 
-/* Probability slider */
 .probability-slider {
   display: block;
   width: 100%;
@@ -269,7 +531,10 @@
   font-size: 12px;
 }
 
-/* Follow-up information */
+/* =====================================
+   FOLLOW-UP INFORMATION
+===================================== */
+
 .follow-up-panel {
   width: 100%;
   margin-top: 22px;
@@ -350,39 +615,53 @@
   box-shadow: 0 0 0 3px rgba(35, 134, 197, 0.10);
 }
 
-/* Tablet layout */
-@media (max-width: 850px) {
+/* =====================================
+   TABLET
+===================================== */
+
+@media (max-width: 1000px) {
   .stats {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .dashboard-main {
-    padding: 20px;
+    padding: 24px;
+  }
+
+  .sidebar {
+    width: 220px;
+    min-width: 220px;
   }
 }
 
-/* Mobile layout */
-@media (max-width: 550px) {
+/* =====================================
+   MOBILE
+===================================== */
+
+@media (max-width: 700px) {
   .dashboard {
     flex-direction: column;
   }
 
   .sidebar {
     width: 100%;
+    min-width: 0;
+    padding: 20px;
   }
 
   .sidebar nav {
     flex-direction: row;
     flex-wrap: wrap;
+    gap: 8px;
     margin-top: 20px;
   }
 
-  .stats {
-    grid-template-columns: 1fr;
+  .menu-item {
+    width: auto;
   }
 
   .dashboard-main {
-    padding: 14px;
+    padding: 16px;
   }
 
   .dashboard-header,
@@ -391,8 +670,21 @@
     flex-direction: column;
   }
 
+  .dashboard-header > div:last-child {
+    flex-wrap: wrap;
+  }
+
   .visitor-section {
-    padding: 15px;
+    padding: 18px;
+  }
+
+  .form-grid,
+  .product-list {
+    grid-template-columns: 1fr;
+  }
+
+  .form-products {
+    padding: 16px;
   }
 
   .visitor-list .stat-card {
@@ -414,36 +706,122 @@
   }
 }
 
-/* Left-align dashboard headings */
-.dashboard-header > div:first-child {
-  text-align: left !important;
-  margin-right: auto;
+@media (max-width: 450px) {
+  .stats {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-header h1 {
+    font-size: 23px;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .form-actions button {
+    width: 100%;
+  }
 }
 
-.visitor-heading > div:first-child {
-  text-align: left !important;
-  margin-right: auto;
+/* =====================================
+   REFINED VISITOR FORM INPUTS
+===================================== */
+
+.visitor-form-section .visitor-entry-form .form-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  max-width: 1100px;
+  gap: 24px 30px;
 }
 
-.dashboard-header,
-.visitor-heading {
-  justify-content: space-between;
+.visitor-form-section .form-field input,
+.visitor-form-section .form-field select {
+  width: 100%;
+  max-width: 520px;
+  min-height: 44px;
+  padding: 11px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+  background: #fff;
+  font-size: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-/* Make visitor form input text black */
-.registration-page .container form input,
-.registration-page .container form textarea,
-.registration-page .container form select {
-  color: #000000 !important;
-  -webkit-text-fill-color: #000000 !important;
+.visitor-form-section .form-field textarea {
+  border-radius: 9px;
+  max-width: 900px;
 }
 
-/* Make placeholder text readable */
-.registration-page .container form input::placeholder,
-.registration-page .container form textarea::placeholder {
-  color: #666666 !important;
-  -webkit-text-fill-color: #666666 !important;
-  opacity: 1;
+.visitor-form-section .form-field input:focus,
+.visitor-form-section .form-field select:focus,
+.visitor-form-section .form-field textarea:focus {
+  border-color: #2876a8;
+  box-shadow: 0 0 0 3px rgba(40, 118, 168, 0.12);
+  outline: none;
 }
 
+/* =====================================
+   FANCY H. S. MARTIN SIDEBAR BRANDING
+===================================== */
 
+.sidebar-brand {
+  padding: 16px 12px 24px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+  position: relative;
+}
+
+.sidebar-brand::after {
+  content: "";
+  display: block;
+  width: 48px;
+  height: 3px;
+  margin-top: 17px;
+  background: #8dc5e8;
+  border-radius: 10px;
+}
+
+.sidebar-brand h2 {
+  color: #ffffff;
+  font-size: 23px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  margin: 0;
+}
+
+.sidebar-brand p {
+  color: #b8d8ef;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 4px;
+  margin-top: 7px;
+}
+
+/* Mobile adjustment */
+
+@media (max-width: 700px) {
+  .visitor-form-section .visitor-entry-form .form-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .visitor-form-section .form-field input,
+  .visitor-form-section .form-field select {
+    max-width: 100%;
+  }
+
+  .sidebar-brand {
+    padding: 10px 5px 15px;
+  }
+}
+
+/* =====================================
+   NEW VISITOR INPUT CORNERS
+   Changes only the corner shape
+===================================== */
+
+.dashboard .visitor-entry-form input:not([type="checkbox"]),
+.dashboard .visitor-entry-form select,
+.dashboard .visitor-entry-form textarea {
+  border-radius: 8px !important;
+}
