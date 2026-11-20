@@ -728,14 +728,8 @@ export default function Dashboard() {
                 key={item.name}
                 className={`menu-item ${activeTab === item.name ? "active" : ""}`}
                 onClick={() => {
-                  setActiveTab(item.name);
-                  setSearch("");
-
-                  if (item.name !== "Edit Visitor") {
-                    setEditingVisitor(null);
-                    setVisitorForm(emptyVisitor);
-                  }
-                }}
+  setActiveTab(item.name);
+}}
               >
                 <Icon size={18} />
                 <span>{item.name}</span>
