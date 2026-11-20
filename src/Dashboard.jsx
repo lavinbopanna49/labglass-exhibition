@@ -78,6 +78,7 @@ export default function Dashboard() {
   const [filterExhibition, setFilterExhibition] = useState("");
   const [filterCompany, setFilterCompany] = useState("");
   const [filterYear, setFilterYear] = useState("");
+  const [filterState, setFilterState] = useState("");
   const [sortBy, setSortBy] = useState("created_at");
   const [sortOrder, setSortOrder] = useState("desc");
 
@@ -494,38 +495,34 @@ export default function Dashboard() {
 
   // FILTER AND SORT VISITORS
   const filteredVisitors = visitors
-    .filter((visitor) => {
-      const term = search.toLowerCase();
+  .filter((visitor) => {
+    const term = search.toLowerCase();
 
-      const matchesSearch =
-        (visitor.name || "").toLowerCase().includes(term) ||
-        (visitor.company || "").toLowerCase().includes(term) ||
-        (visitor.email || "").toLowerCase().includes(term) ||
-        (visitor.phone || "").toLowerCase().includes(term);
+    const matchesSearch =
+      (visitor.name || "").toLowerCase().includes(term) ||
+      (visitor.company || "").toLowerCase().includes(term) ||
+      (visitor.email || "").toLowerCase().includes(term) ||
+      (visitor.phone || "").toLowerCase().includes(term);
 
-      const matchesExhibition =
-        !filterExhibition || visitor.exhibition_id === filterExhibition;
+    const matchesExhibition =
+      !filterExhibition || visitor.exhibition_id === filterExhibition;
 
-      const matchesCompany =
-        !filterCompany || visitor.company === filterCompany;
+    const matchesCompany =
+      !filterCompany || visitor.company === filterCompany;
 
-      const visitorExhibition = exhibitions.find(
-        (item) => item.id === visitor.exhibition_id
-      );
+    const matchesState =
+      !filterState || visitor.state === filterState;
 
-      const matchesYear =
-        !filterYear || String(visitorExhibition?.year) === filterYear;
-
-      return (
-        matchesSearch &&
-        matchesExhibition &&
-        matchesCompany &&
-        matchesYear
-      );
-    })
-    .sort((a, b) => {
-      let valueA;
-      let valueB;
+    return (
+      matchesSearch &&
+      matchesExhibition &&
+      matchesCompany &&
+      matchesState
+    );
+  })
+  .sort((a, b) => {
+    let valueA;
+    let valueB;
 
       if (sortBy === "exhibition") {
         valueA =
@@ -1151,18 +1148,18 @@ export default function Dashboard() {
               </select>
 
               <select
-                value={filterYear}
-                onChange={(event) => setFilterYear(event.target.value)}
-              >
-                <option value="">All Years</option>
+               value={filterState}
+  onChange={(event) => setFilterState(event.target.value)}
+>
+  <option value="">All States</option>
 
-                {[...new Set(exhibitions.map((item) => item.year))]
-                  .sort((a, b) => b - a)
-                  .map((year) => (
-                    <option key={year} value={String(year)}>
-                      {year}
-                    </option>
-                  ))}
+  {[...new Set(visitors.map((v) => v.state).filter(Boolean))]
+    .sort()
+    .map((state) => (
+      <option key={state} value={state}>
+        {state}
+      </option>
+    ))}
               </select>
 
               <select
