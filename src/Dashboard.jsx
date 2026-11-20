@@ -998,18 +998,48 @@ export default function Dashboard() {
 
               <h3>Products Interested In</h3>
 
-              <div className="product-list">
-                {products.map((product) => (
-                  <label className="product-option" key={product}>
-                    <input
-                      type="checkbox"
-                      checked={visitorForm.interests.includes(product)}
-                      onChange={() => toggleInterest(product)}
-                    />
-                    {product}
-                  </label>
-                ))}
-              </div>
+              <div
+  className="product-list"
+  onKeyDown={(event) => {
+    if (event.key !== "Enter") return;
+
+    const checkboxes = Array.from(
+      event.currentTarget.querySelectorAll('input[type="checkbox"]')
+    );
+
+    const currentIndex = checkboxes.indexOf(event.target);
+
+    if (currentIndex === -1) return;
+
+    event.preventDefault();
+
+    const currentProduct = products[currentIndex];
+
+    toggleInterest(currentProduct);
+
+    const nextCheckbox = checkboxes[currentIndex + 1];
+
+    if (nextCheckbox) {
+      nextCheckbox.focus();
+    } else {
+      event.currentTarget
+        .closest("form")
+        ?.querySelector('textarea[name="requirements"]')
+        ?.focus();
+    }
+  }}
+>
+  {products.map((product) => (
+    <label className="product-option" key={product}>
+      <input
+        type="checkbox"
+        checked={visitorForm.interests.includes(product)}
+        onChange={() => toggleInterest(product)}
+      />
+      {product}
+    </label>
+  ))}
+</div>
 
               <label>Additional Requirements</label>
 
