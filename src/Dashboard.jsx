@@ -991,12 +991,13 @@ export default function Dashboard() {
               />
 
               <label>Email Address</label>
-              <input
-                name="email"
-                type="email"
-                value={visitorForm.email}
-                onChange={changeVisitorField}
-              />
+<input
+  name="email"
+  type="text"
+  value={visitorForm.email}
+  onChange={changeVisitorField}
+  placeholder="Enter email address"
+/>
 
               <label>Country</label>
               <input
