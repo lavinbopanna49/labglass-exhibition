@@ -918,7 +918,38 @@ export default function Dashboard() {
               {editingVisitor ? "Edit Visitor" : "Enter New Visitor"}
             </h2>
 
-            <form className="visitor-entry-form" onSubmit={saveVisitor}>
+            <form
+  className="visitor-entry-form"
+  onSubmit={saveVisitor}
+  onKeyDownCapture={(event) => {
+    if (
+      event.key === "Enter" &&
+      event.target.matches('input[type="checkbox"]') &&
+      event.target.closest(".product-list")
+    ) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const checkboxes = Array.from(
+        event.currentTarget.querySelectorAll(
+          '.product-list input[type="checkbox"]'
+        )
+      );
+
+      const currentIndex = checkboxes.indexOf(event.target);
+
+      toggleInterest(products[currentIndex]);
+
+      if (checkboxes[currentIndex + 1]) {
+        checkboxes[currentIndex + 1].focus();
+      } else {
+        event.currentTarget
+          .querySelector('textarea[name="requirements"]')
+          ?.focus();
+      }
+    }
+  }}
+>
               <label>Exhibition *</label>
 
               <select
