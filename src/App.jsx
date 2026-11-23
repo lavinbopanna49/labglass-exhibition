@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "./supabase";
 import Dashboard from "./Dashboard.jsx";
@@ -28,6 +29,66 @@ function App() {
 
     return () => {
       subscription.unsubscribe();
+    };
+  }, []);
+
+  // Create browser history for Dashboard -> Overview -> Login
+  useEffect(() => {
+    if (!session) return;
+
+    const currentUrl =
+      window.location.pathname +
+      window.location.search +
+      window.location.hash;
+
+    window.history.replaceState(
+      { appScreen: "login" },
+      "",
+      currentUrl
+    );
+
+    window.history.pushState(
+      { appScreen: "overview" },
+      "",
+      currentUrl
+    );
+
+    window.history.pushState(
+      { appScreen: "dashboard" },
+      "",
+      currentUrl
+    );
+
+    function handlePopState(event) {
+      if (event.state?.appScreen === "overview") {
+        window.dispatchEvent(
+          new Event("app-back-to-overview")
+        );
+      }
+
+      if (event.state?.appScreen === "login") {
+        supabase.auth.signOut();
+      }
+    }
+
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [Boolean(session)]);
+
+  // Ask for confirmation when leaving or closing the website
+  useEffect(() => {
+    function confirmLeaving(event) {
+      event.preventDefault();
+      event.returnValue = "";
+    }
+
+    window.addEventListener("beforeunload", confirmLeaving);
+
+    return () => {
+      window.removeEventListener("beforeunload", confirmLeaving);
     };
   }, []);
 

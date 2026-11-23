@@ -171,6 +171,25 @@ export default function Dashboard() {
     };
   }, []);
 
+  // HANDLE BROWSER BACK BUTTON
+  useEffect(() => {
+    function handleBackToOverview() {
+      setActiveTab("Overview");
+    }
+
+    window.addEventListener(
+      "app-back-to-overview",
+      handleBackToOverview
+    );
+
+    return () => {
+      window.removeEventListener(
+        "app-back-to-overview",
+        handleBackToOverview
+      );
+    };
+  }, []);
+
   async function logout() {
     const { error } = await supabase.auth.signOut();
     if (error) alert(error.message);
@@ -495,34 +514,34 @@ export default function Dashboard() {
 
   // FILTER AND SORT VISITORS
   const filteredVisitors = visitors
-  .filter((visitor) => {
-    const term = search.toLowerCase();
+    .filter((visitor) => {
+      const term = search.toLowerCase();
 
-    const matchesSearch =
-      (visitor.name || "").toLowerCase().includes(term) ||
-      (visitor.company || "").toLowerCase().includes(term) ||
-      (visitor.email || "").toLowerCase().includes(term) ||
-      (visitor.phone || "").toLowerCase().includes(term);
+      const matchesSearch =
+        (visitor.name || "").toLowerCase().includes(term) ||
+        (visitor.company || "").toLowerCase().includes(term) ||
+        (visitor.email || "").toLowerCase().includes(term) ||
+        (visitor.phone || "").toLowerCase().includes(term);
 
-    const matchesExhibition =
-      !filterExhibition || visitor.exhibition_id === filterExhibition;
+      const matchesExhibition =
+        !filterExhibition || visitor.exhibition_id === filterExhibition;
 
-    const matchesCompany =
-      !filterCompany || visitor.company === filterCompany;
+      const matchesCompany =
+        !filterCompany || visitor.company === filterCompany;
 
-    const matchesState =
-      !filterState || visitor.state === filterState;
+      const matchesState =
+        !filterState || visitor.state === filterState;
 
-    return (
-      matchesSearch &&
-      matchesExhibition &&
-      matchesCompany &&
-      matchesState
-    );
-  })
-  .sort((a, b) => {
-    let valueA;
-    let valueB;
+      return (
+        matchesSearch &&
+        matchesExhibition &&
+        matchesCompany &&
+        matchesState
+      );
+    })
+    .sort((a, b) => {
+      let valueA;
+      let valueB;
 
       if (sortBy === "exhibition") {
         valueA =
@@ -694,8 +713,7 @@ export default function Dashboard() {
       </div>
     );
   }
-
-  return (
+    return (
     <div className="dashboard">
       <aside className="sidebar">
         <div className="sidebar-brand">
@@ -725,8 +743,16 @@ export default function Dashboard() {
                 key={item.name}
                 className={`menu-item ${activeTab === item.name ? "active" : ""}`}
                 onClick={() => {
-  setActiveTab(item.name);
-}}
+                  if (window.history.state?.appScreen !== "dashboard") {
+                    window.history.pushState(
+                      { appScreen: "dashboard" },
+                      "",
+                      window.location.href
+                    );
+                  }
+
+                  setActiveTab(item.name);
+                }}
               >
                 <Icon size={18} />
                 <span>{item.name}</span>
@@ -910,37 +936,37 @@ export default function Dashboard() {
             </h2>
 
             <form
-  className="visitor-entry-form"
-  onSubmit={saveVisitor}
-  onKeyDownCapture={(event) => {
-    if (
-      event.key === "Enter" &&
-      event.target.matches('input[type="checkbox"]') &&
-      event.target.closest(".product-list")
-    ) {
-      event.preventDefault();
-      event.stopPropagation();
+              className="visitor-entry-form"
+              onSubmit={saveVisitor}
+              onKeyDownCapture={(event) => {
+                if (
+                  event.key === "Enter" &&
+                  event.target.matches('input[type="checkbox"]') &&
+                  event.target.closest(".product-list")
+                ) {
+                  event.preventDefault();
+                  event.stopPropagation();
 
-      const checkboxes = Array.from(
-        event.currentTarget.querySelectorAll(
-          '.product-list input[type="checkbox"]'
-        )
-      );
+                  const checkboxes = Array.from(
+                    event.currentTarget.querySelectorAll(
+                      '.product-list input[type="checkbox"]'
+                    )
+                  );
 
-      const currentIndex = checkboxes.indexOf(event.target);
+                  const currentIndex = checkboxes.indexOf(event.target);
 
-      toggleInterest(products[currentIndex]);
+                  toggleInterest(products[currentIndex]);
 
-      if (checkboxes[currentIndex + 1]) {
-        checkboxes[currentIndex + 1].focus();
-      } else {
-        event.currentTarget
-          .querySelector('textarea[name="requirements"]')
-          ?.focus();
-      }
-    }
-  }}
->
+                  if (checkboxes[currentIndex + 1]) {
+                    checkboxes[currentIndex + 1].focus();
+                  } else {
+                    event.currentTarget
+                      .querySelector('textarea[name="requirements"]')
+                      ?.focus();
+                  }
+                }
+              }}
+            >
               <label>Exhibition *</label>
 
               <select
@@ -988,13 +1014,13 @@ export default function Dashboard() {
               />
 
               <label>Email Address</label>
-<input
-  name="email"
-  type="text"
-  value={visitorForm.email}
-  onChange={changeVisitorField}
-  placeholder="Enter email address"
-/>
+              <input
+                name="email"
+                type="text"
+                value={visitorForm.email}
+                onChange={changeVisitorField}
+                placeholder="Enter email address"
+              />
 
               <label>Country</label>
               <input
@@ -1022,47 +1048,47 @@ export default function Dashboard() {
               <h3>Products Interested In</h3>
 
               <div
-  className="product-list"
-  onKeyDown={(event) => {
-    if (event.key !== "Enter") return;
+                className="product-list"
+                onKeyDown={(event) => {
+                  if (event.key !== "Enter") return;
 
-    const checkboxes = Array.from(
-      event.currentTarget.querySelectorAll('input[type="checkbox"]')
-    );
+                  const checkboxes = Array.from(
+                    event.currentTarget.querySelectorAll('input[type="checkbox"]')
+                  );
 
-    const currentIndex = checkboxes.indexOf(event.target);
+                  const currentIndex = checkboxes.indexOf(event.target);
 
-    if (currentIndex === -1) return;
+                  if (currentIndex === -1) return;
 
-    event.preventDefault();
+                  event.preventDefault();
 
-    const currentProduct = products[currentIndex];
+                  const currentProduct = products[currentIndex];
 
-    toggleInterest(currentProduct);
+                  toggleInterest(currentProduct);
 
-    const nextCheckbox = checkboxes[currentIndex + 1];
+                  const nextCheckbox = checkboxes[currentIndex + 1];
 
-    if (nextCheckbox) {
-      nextCheckbox.focus();
-    } else {
-      event.currentTarget
-        .closest("form")
-        ?.querySelector('textarea[name="requirements"]')
-        ?.focus();
-    }
-  }}
->
-  {products.map((product) => (
-    <label className="product-option" key={product}>
-      <input
-        type="checkbox"
-        checked={visitorForm.interests.includes(product)}
-        onChange={() => toggleInterest(product)}
-      />
-      {product}
-    </label>
-  ))}
-</div>
+                  if (nextCheckbox) {
+                    nextCheckbox.focus();
+                  } else {
+                    event.currentTarget
+                      .closest("form")
+                      ?.querySelector('textarea[name="requirements"]')
+                      ?.focus();
+                  }
+                }}
+              >
+                {products.map((product) => (
+                  <label className="product-option" key={product}>
+                    <input
+                      type="checkbox"
+                      checked={visitorForm.interests.includes(product)}
+                      onChange={() => toggleInterest(product)}
+                    />
+                    {product}
+                  </label>
+                ))}
+              </div>
 
               <label>Additional Requirements</label>
 
@@ -1148,18 +1174,18 @@ export default function Dashboard() {
               </select>
 
               <select
-               value={filterState}
-  onChange={(event) => setFilterState(event.target.value)}
->
-  <option value="">All States</option>
+                value={filterState}
+                onChange={(event) => setFilterState(event.target.value)}
+              >
+                <option value="">All States</option>
 
-  {[...new Set(visitors.map((v) => v.state).filter(Boolean))]
-    .sort()
-    .map((state) => (
-      <option key={state} value={state}>
-        {state}
-      </option>
-    ))}
+                {[...new Set(visitors.map((v) => v.state).filter(Boolean))]
+                  .sort()
+                  .map((state) => (
+                    <option key={state} value={state}>
+                      {state}
+                    </option>
+                  ))}
               </select>
 
               <select
