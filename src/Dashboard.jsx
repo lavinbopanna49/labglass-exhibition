@@ -20,10 +20,13 @@ const emptyVisitor = {
   designation: "",
   phone: "",
   email: "",
-  country: "",
+  country: "India",
   state: "",
+  union_territory: "",
   interests: [],
-  requirements: ""
+  requirements: "",
+  visit_required: false,
+  send_brochures: false,
 };
 
 const products = [
@@ -40,15 +43,54 @@ const products = [
   "OEM Glassware Products",
 ];
 
-const indianStates = [
-  "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar",
-  "Chhattisgarh", "Goa", "Gujarat", "Haryana",
-  "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala",
-  "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya",
-  "Mizoram", "Nagaland", "Odisha", "Punjab", "Rajasthan",
-  "Sikkim", "Tamil Nadu", "Telangana", "Tripura",
-  "Uttar Pradesh", "Uttarakhand", "West Bengal",
-  "Delhi", "Jammu and Kashmir", "Ladakh", "Puducherry",
+const indianStatesByRegion = {
+  North: [
+    "Haryana",
+    "Himachal Pradesh",
+    "Punjab",
+    "Rajasthan",
+    "Uttar Pradesh",
+    "Uttarakhand",
+  ],
+  South: [
+    "Andhra Pradesh",
+    "Karnataka",
+    "Kerala",
+    "Tamil Nadu",
+    "Telangana",
+  ],
+  East: [
+    "Arunachal Pradesh",
+    "Assam",
+    "Bihar",
+    "Chhattisgarh",
+    "Jharkhand",
+    "Manipur",
+    "Meghalaya",
+    "Mizoram",
+    "Nagaland",
+    "Odisha",
+    "Sikkim",
+    "Tripura",
+    "West Bengal",
+  ],
+  West: [
+    "Goa",
+    "Gujarat",
+    "Madhya Pradesh",
+    "Maharashtra",
+  ],
+};
+
+const indianUnionTerritories = [
+  "Andaman and Nicobar Islands",
+  "Chandigarh",
+  "Dadra and Nagar Haveli and Daman and Diu",
+  "Delhi",
+  "Jammu and Kashmir",
+  "Ladakh",
+  "Lakshadweep",
+  "Puducherry",
 ];
 
 function probabilityLevel(value) {
@@ -312,10 +354,12 @@ export default function Dashboard() {
     setSaving(true);
 
     const visitorData = {
-      ...visitorForm,
-      name: visitorForm.name.trim(),
-      exhibition_id: selectedExhibition,
-    };
+  ...visitorForm,
+  name: visitorForm.name.trim(),
+  exhibition_id: selectedExhibition,
+  visit_required: visitorForm.visit_required,
+  send_brochures: visitorForm.send_brochures,
+};
 
     let result;
 
@@ -373,10 +417,13 @@ export default function Dashboard() {
       designation: visitor.designation || "",
       phone: visitor.phone || "",
       email: visitor.email || "",
-      country: visitor.country || "",
+      country: visitor.country || "India",
       state: visitor.state || "",
+      union_territory: visitor.union_territory || "",
       interests: visitor.interests || [],
       requirements: visitor.requirements || "",
+      visit_required: visitor.visit_required || false,
+      send_brochures: visitor.send_brochures || false,
     });
 
     setSelectedExhibition(visitor.exhibition_id || "");
@@ -451,11 +498,12 @@ export default function Dashboard() {
       sheet.columns = [
         { header: "Visitor Name", key: "name", width: 25 },
         { header: "Company", key: "company", width: 25 },
-        { header: "Designation", key: "designation", width: 20 },
+                { header: "Designation", key: "designation", width: 20 },
         { header: "Phone", key: "phone", width: 18 },
         { header: "Email", key: "email", width: 28 },
         { header: "Country", key: "country", width: 18 },
         { header: "State", key: "state", width: 20 },
+        { header: "Union Territory", key: "union_territory", width: 30 },
         { header: "Exhibition", key: "exhibition", width: 28 },
         { header: "Interests", key: "interests", width: 40 },
         { header: "Requirements", key: "requirements", width: 35 },
@@ -478,6 +526,7 @@ export default function Dashboard() {
           email: visitor.email || "",
           country: visitor.country || "",
           state: visitor.state || "",
+          union_territory: visitor.union_territory || "",
           exhibition: exhibition?.exhibition_name || "",
           interests: (visitor.interests || []).join(", "),
           requirements: visitor.requirements || "",
@@ -587,7 +636,7 @@ export default function Dashboard() {
         <p><strong>Phone:</strong> {visitor.phone || "Not provided"}</p>
         <p><strong>Email:</strong> {visitor.email || "Not provided"}</p>
         <p><strong>Country:</strong> {visitor.country || "Not provided"}</p>
-        <p><strong>State:</strong> {visitor.state || "Not provided"}</p>
+        <p><strong>State / Union Territory:</strong> {visitor.state || visitor.union_territory || "Not provided"}</p>
         <p><strong>Exhibition:</strong> {exhibitionName(visitor.exhibition_id)}</p>
         <p>
           <strong>Interests:</strong>{" "}
@@ -949,7 +998,7 @@ export default function Dashboard() {
 
                   const checkboxes = Array.from(
                     event.currentTarget.querySelectorAll(
-                      '.product-list input[type="checkbox"]'
+                                            '.product-list input[type="checkbox"]'
                     )
                   );
 
@@ -1030,19 +1079,40 @@ export default function Dashboard() {
               />
 
               <label>State / Union Territory</label>
-
               <select
-                name="state"
-                value={visitorForm.state}
-                onChange={changeVisitorField}
-              >
-                <option value="">Select State / UT</option>
+                name="state_or_union_territory"
+                value={visitorForm.state || visitorForm.union_territory}
+                onChange={(event) => {
+                  const selectedLocation = event.target.value;
+                  const isUnionTerritory =
+                    indianUnionTerritories.includes(selectedLocation);
 
-                {indianStates.map((state) => (
-                  <option key={state} value={state}>
-                    {state}
-                  </option>
+                  setVisitorForm((current) => ({
+                    ...current,
+                    state: isUnionTerritory ? "" : selectedLocation,
+                    union_territory: isUnionTerritory ? selectedLocation : "",
+                  }));
+                }}
+              >
+                <option value="">Select State / Union Territory</option>
+
+                {Object.entries(indianStatesByRegion).map(([region, states]) => (
+                  <optgroup label={region} key={region}>
+                    {states.map((state) => (
+                      <option key={state} value={state}>
+                        {state}
+                      </option>
+                    ))}
+                  </optgroup>
                 ))}
+
+                <optgroup label="Union Territories">
+                  {indianUnionTerritories.map((territory) => (
+                    <option key={territory} value={territory}>
+                      {territory}
+                    </option>
+                  ))}
+                </optgroup>
               </select>
 
               <h3>Products Interested In</h3>
@@ -1090,7 +1160,7 @@ export default function Dashboard() {
                 ))}
               </div>
 
-              <label>Additional Requirements</label>
+              <label>Additional Notes/Comments</label>
 
               <textarea
                 name="requirements"
@@ -1098,6 +1168,38 @@ export default function Dashboard() {
                 value={visitorForm.requirements}
                 onChange={changeVisitorField}
               />
+
+              <div className="visitor-checkbox-options">
+                <label>
+                  <input
+                    type="checkbox"
+                    name="visit_required"
+                    checked={visitorForm.visit_required}
+                    onChange={(event) =>
+                      setVisitorForm((current) => ({
+                        ...current,
+                        visit_required: event.target.checked,
+                      }))
+                    }
+                  />
+                  Visit Required
+                </label>
+
+                <label>
+                  <input
+                    type="checkbox"
+                    name="send_brochures"
+                    checked={visitorForm.send_brochures}
+                    onChange={(event) =>
+                      setVisitorForm((current) => ({
+                        ...current,
+                        send_brochures: event.target.checked,
+                      }))
+                    }
+                  />
+                  Send Brochures
+                </label>
+              </div>
 
               <button
                 type="submit"

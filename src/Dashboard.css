@@ -1377,3 +1377,26 @@
   background: #fee2e2;
   color: #b91c1c;
 }
+.visitor-checkbox-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-top: 14px;
+  margin-bottom: 10px;
+}
+
+.visitor-checkbox-options label {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #243447;
+}
+
+.visitor-checkbox-options input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  accent-color: #2876a8;
+  cursor: pointer;
+}
