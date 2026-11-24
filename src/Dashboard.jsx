@@ -314,14 +314,20 @@ export default function Dashboard() {
     alert("Exhibition deleted successfully.");
   }
 
-  function changeVisitorField(event) {
-    const { name, value } = event.target;
+ function changeVisitorField(event) {
+  const { name, value } = event.target;
 
-    setVisitorForm((current) => ({
-      ...current,
-      [name]: value,
-    }));
-  }
+  const capitalizeFields = ["name", "company", "designation"];
+
+  const updatedValue = capitalizeFields.includes(name)
+    ? value.replace(/\b\w/g, (char) => char.toUpperCase())
+    : value;
+
+  setVisitorForm((current) => ({
+    ...current,
+    [name]: updatedValue,
+  }));
+}
 
   function toggleInterest(product) {
     setVisitorForm((current) => ({
