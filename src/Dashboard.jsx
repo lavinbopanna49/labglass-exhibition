@@ -116,6 +116,10 @@ export default function Dashboard() {
   const [visitorForm, setVisitorForm] = useState(emptyVisitor);
   const [editingVisitor, setEditingVisitor] = useState(null);
 
+  // Previous / Next visitor navigation
+  const [editNavigationList, setEditNavigationList] = useState([]);
+  const [editNavigationIndex, setEditNavigationIndex] = useState(0);
+
   const [search, setSearch] = useState("");
   const [filterExhibition, setFilterExhibition] = useState("");
   const [filterCompany, setFilterCompany] = useState("");
@@ -143,8 +147,14 @@ export default function Dashboard() {
       ] = await Promise.all([
         supabase.auth.getUser(),
         supabase.rpc("get_user_role"),
-        supabase.from("exhibitions").select("*").order("year", { ascending: false }),
-        supabase.from("visitors").select("*").order("created_at", { ascending: false }),
+        supabase
+          .from("exhibitions")
+          .select("*")
+          .order("year", { ascending: false }),
+        supabase
+          .from("visitors")
+          .select("*")
+          .order("created_at", { ascending: false }),
       ]);
 
       if (!active) return;
@@ -165,6 +175,7 @@ export default function Dashboard() {
         setError(exhibitionResult.error.message);
       } else {
         setExhibitions(exhibitionResult.data || []);
+
         if (exhibitionResult.data?.length) {
           setSelectedExhibition(exhibitionResult.data[0].id);
         }
@@ -234,6 +245,7 @@ export default function Dashboard() {
 
   async function logout() {
     const { error } = await supabase.auth.signOut();
+
     if (error) alert(error.message);
   }
 
@@ -300,6 +312,7 @@ export default function Dashboard() {
       } else {
         alert("Could not delete exhibition: " + error.message);
       }
+
       return;
     }
 
@@ -314,21 +327,23 @@ export default function Dashboard() {
     alert("Exhibition deleted successfully.");
   }
 
- function changeVisitorField(event) {
-  const { name, value } = event.target;
+  // CHANGE VISITOR FIELD
+  function changeVisitorField(event) {
+    const { name, value } = event.target;
 
-  const capitalizeFields = ["name", "company", "designation"];
+    const capitalizeFields = ["name", "company", "designation"];
 
-  const updatedValue = capitalizeFields.includes(name)
-    ? value.replace(/\b\w/g, (char) => char.toUpperCase())
-    : value;
+    const updatedValue = capitalizeFields.includes(name)
+      ? value.replace(/\b\w/g, (char) => char.toUpperCase())
+      : value;
 
-  setVisitorForm((current) => ({
-    ...current,
-    [name]: updatedValue,
-  }));
-}
+    setVisitorForm((current) => ({
+      ...current,
+      [name]: updatedValue,
+    }));
+  }
 
+  // TOGGLE PRODUCT INTEREST
   function toggleInterest(product) {
     setVisitorForm((current) => ({
       ...current,
@@ -336,6 +351,28 @@ export default function Dashboard() {
         ? current.interests.filter((item) => item !== product)
         : [...current.interests, product],
     }));
+  }
+
+  // LOAD VISITOR DETAILS INTO THE EDIT FORM
+  function loadVisitorIntoForm(visitor) {
+    setEditingVisitor(visitor);
+
+    setVisitorForm({
+      name: visitor.name || "",
+      company: visitor.company || "",
+      designation: visitor.designation || "",
+      phone: visitor.phone || "",
+      email: visitor.email || "",
+      country: visitor.country || "India",
+      state: visitor.state || "",
+      union_territory: visitor.union_territory || "",
+      interests: visitor.interests || [],
+      requirements: visitor.requirements || "",
+      visit_required: visitor.visit_required || false,
+      send_brochures: visitor.send_brochures || false,
+    });
+
+    setSelectedExhibition(visitor.exhibition_id || "");
   }
 
   // SAVE VISITOR
@@ -360,12 +397,12 @@ export default function Dashboard() {
     setSaving(true);
 
     const visitorData = {
-  ...visitorForm,
-  name: visitorForm.name.trim(),
-  exhibition_id: selectedExhibition,
-  visit_required: visitorForm.visit_required,
-  send_brochures: visitorForm.send_brochures,
-};
+      ...visitorForm,
+      name: visitorForm.name.trim(),
+      exhibition_id: selectedExhibition,
+      visit_required: visitorForm.visit_required,
+      send_brochures: visitorForm.send_brochures,
+    };
 
     let result;
 
@@ -391,15 +428,45 @@ export default function Dashboard() {
       return;
     }
 
-    alert(
-      editingVisitor
-        ? "Visitor updated successfully."
-        : "Visitor saved successfully."
-    );
+    if (editingVisitor) {
+      const updatedVisitor = {
+        ...editingVisitor,
+        ...visitorData,
+      };
+
+      setVisitors((current) =>
+        current.map((visitor) =>
+          visitor.id === editingVisitor.id
+            ? updatedVisitor
+            : visitor
+        )
+      );
+
+      setEditNavigationList((current) =>
+        current.map((visitor) =>
+          visitor.id === editingVisitor.id
+            ? updatedVisitor
+            : visitor
+        )
+      );
+
+      setEditingVisitor(updatedVisitor);
+
+      alert("Visitor updated successfully.");
+
+      // Stay on the same edit screen
+      return;
+    }
+
+    alert("Visitor saved successfully.");
 
     setVisitorForm(emptyVisitor);
-    setEditingVisitor(null);
     setActiveTab("New Visitor");
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
 
     const { data, error } = await supabase
       .from("visitors")
@@ -414,31 +481,52 @@ export default function Dashboard() {
   }
 
   // EDIT VISITOR
-  function editVisitor(visitor) {
-    setEditingVisitor(visitor);
+  function editVisitor(visitor, navigationList = filteredVisitors) {
+    const list = navigationList.length
+      ? navigationList
+      : [visitor];
 
-    setVisitorForm({
-      name: visitor.name || "",
-      company: visitor.company || "",
-      designation: visitor.designation || "",
-      phone: visitor.phone || "",
-      email: visitor.email || "",
-      country: visitor.country || "India",
-      state: visitor.state || "",
-      union_territory: visitor.union_territory || "",
-      interests: visitor.interests || [],
-      requirements: visitor.requirements || "",
-      visit_required: visitor.visit_required || false,
-      send_brochures: visitor.send_brochures || false,
-    });
+    const visitorIndex = list.findIndex(
+      (item) => item.id === visitor.id
+    );
 
-    setSelectedExhibition(visitor.exhibition_id || "");
+    setEditNavigationList(list);
+    setEditNavigationIndex(visitorIndex >= 0 ? visitorIndex : 0);
+
+    loadVisitorIntoForm(visitor);
+
     setActiveTab("Edit Visitor");
   }
 
+  // PREVIOUS / NEXT VISITOR
+  function navigateEditVisitor(direction) {
+    const nextIndex = editNavigationIndex + direction;
+
+    if (
+      nextIndex < 0 ||
+      nextIndex >= editNavigationList.length
+    ) {
+      return;
+    }
+
+    setEditNavigationIndex(nextIndex);
+
+    const nextVisitor = editNavigationList[nextIndex];
+
+    loadVisitorIntoForm(nextVisitor);
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  }
+
+  // CANCEL EDIT
   function cancelEdit() {
     setEditingVisitor(null);
     setVisitorForm(emptyVisitor);
+    setEditNavigationList([]);
+    setEditNavigationIndex(0);
     setActiveTab("All Visitors");
   }
 
@@ -504,7 +592,7 @@ export default function Dashboard() {
       sheet.columns = [
         { header: "Visitor Name", key: "name", width: 25 },
         { header: "Company", key: "company", width: 25 },
-                { header: "Designation", key: "designation", width: 20 },
+        { header: "Designation", key: "designation", width: 20 },
         { header: "Phone", key: "phone", width: 18 },
         { header: "Email", key: "email", width: 28 },
         { header: "Country", key: "country", width: 18 },
@@ -602,6 +690,7 @@ export default function Dashboard() {
         valueA =
           exhibitions.find((item) => item.id === a.exhibition_id)
             ?.exhibition_name || "";
+
         valueB =
           exhibitions.find((item) => item.id === b.exhibition_id)
             ?.exhibition_name || "";
@@ -629,7 +718,11 @@ export default function Dashboard() {
     "Unknown exhibition";
 
   // VISITOR CARD
-  function visitorCard(visitor, showActions = true) {
+  function visitorCard(
+    visitor,
+    showActions = true,
+    navigationList = visitors
+  ) {
     const probability = Number(visitor.customer_probability || 0);
     const level = probabilityLevel(probability);
 
@@ -637,24 +730,52 @@ export default function Dashboard() {
       <div className="stat-card visitor-card" key={visitor.id}>
         <h3>{visitor.name}</h3>
 
-        <p><strong>Company:</strong> {visitor.company || "Not provided"}</p>
-        <p><strong>Designation:</strong> {visitor.designation || "Not provided"}</p>
-        <p><strong>Phone:</strong> {visitor.phone || "Not provided"}</p>
-        <p><strong>Email:</strong> {visitor.email || "Not provided"}</p>
-        <p><strong>Country:</strong> {visitor.country || "Not provided"}</p>
-        <p><strong>State / Union Territory:</strong> {visitor.state || visitor.union_territory || "Not provided"}</p>
-        <p><strong>Exhibition:</strong> {exhibitionName(visitor.exhibition_id)}</p>
+        <p>
+          <strong>Company:</strong> {visitor.company || "Not provided"}
+        </p>
+
+        <p>
+          <strong>Designation:</strong>{" "}
+          {visitor.designation || "Not provided"}
+        </p>
+
+        <p>
+          <strong>Phone:</strong> {visitor.phone || "Not provided"}
+        </p>
+
+        <p>
+          <strong>Email:</strong> {visitor.email || "Not provided"}
+        </p>
+
+        <p>
+          <strong>Country:</strong> {visitor.country || "Not provided"}
+        </p>
+
+        <p>
+          <strong>State / Union Territory:</strong>{" "}
+          {visitor.state || visitor.union_territory || "Not provided"}
+        </p>
+
+        <p>
+          <strong>Exhibition:</strong>{" "}
+          {exhibitionName(visitor.exhibition_id)}
+        </p>
+
         <p>
           <strong>Interests:</strong>{" "}
           {(visitor.interests || []).join(", ") || "None selected"}
         </p>
-        <p><strong>Requirements:</strong> {visitor.requirements || "None"}</p>
+
+        <p>
+          <strong>Requirements:</strong>{" "}
+          {visitor.requirements || "None"}
+        </p>
 
         {showActions && (
           <>
             <button
               type="button"
-              onClick={() => editVisitor(visitor)}
+              onClick={() => editVisitor(visitor, navigationList)}
             >
               Edit Visitor
             </button>
@@ -672,6 +793,7 @@ export default function Dashboard() {
             <div className="probability-panel">
               <div className="probability-heading">
                 <h4>Probability of Ordering</h4>
+
                 <span className={`probability-badge ${level.toLowerCase()}`}>
                   {probability}% · {level}
                 </span>
@@ -724,6 +846,7 @@ export default function Dashboard() {
             </label>
 
             <label>Follow-up date</label>
+
             <input
               type="date"
               value={visitor.follow_up_date || ""}
@@ -735,6 +858,7 @@ export default function Dashboard() {
             />
 
             <label>Follow-up notes</label>
+
             <textarea
               rows="2"
               defaultValue={visitor.follow_up_notes || ""}
@@ -757,6 +881,7 @@ export default function Dashboard() {
     );
   }
 
+  // DISPLAY VISITOR LIST
   function visitorList(list) {
     if (loading) return <p>Loading records...</p>;
     if (error) return <p>Database message: {error}</p>;
@@ -764,11 +889,14 @@ export default function Dashboard() {
 
     return (
       <div className="visitor-list">
-        {list.map((visitor) => visitorCard(visitor))}
+        {list.map((visitor) =>
+          visitorCard(visitor, true, list)
+        )}
       </div>
     );
   }
-    return (
+
+  return (
     <div className="dashboard">
       <aside className="sidebar">
         <div className="sidebar-brand">
@@ -1004,7 +1132,7 @@ export default function Dashboard() {
 
                   const checkboxes = Array.from(
                     event.currentTarget.querySelectorAll(
-                                            '.product-list input[type="checkbox"]'
+                      '.product-list input[type="checkbox"]'
                     )
                   );
 
@@ -1027,7 +1155,9 @@ export default function Dashboard() {
               <select
                 required
                 value={selectedExhibition}
-                onChange={(event) => setSelectedExhibition(event.target.value)}
+                onChange={(event) =>
+                  setSelectedExhibition(event.target.value)
+                }
               >
                 <option value="">Select an exhibition</option>
 
@@ -1039,6 +1169,7 @@ export default function Dashboard() {
               </select>
 
               <label>Full Name *</label>
+
               <input
                 name="name"
                 required
@@ -1047,6 +1178,7 @@ export default function Dashboard() {
               />
 
               <label>Company Name</label>
+
               <input
                 name="company"
                 value={visitorForm.company}
@@ -1054,6 +1186,7 @@ export default function Dashboard() {
               />
 
               <label>Designation</label>
+
               <input
                 name="designation"
                 value={visitorForm.designation}
@@ -1061,6 +1194,7 @@ export default function Dashboard() {
               />
 
               <label>Phone Number</label>
+
               <input
                 name="phone"
                 type="tel"
@@ -1069,6 +1203,7 @@ export default function Dashboard() {
               />
 
               <label>Email Address</label>
+
               <input
                 name="email"
                 type="text"
@@ -1078,6 +1213,7 @@ export default function Dashboard() {
               />
 
               <label>Country</label>
+
               <input
                 name="country"
                 value={visitorForm.country}
@@ -1085,18 +1221,22 @@ export default function Dashboard() {
               />
 
               <label>State / Union Territory</label>
+
               <select
                 name="state_or_union_territory"
                 value={visitorForm.state || visitorForm.union_territory}
                 onChange={(event) => {
                   const selectedLocation = event.target.value;
+
                   const isUnionTerritory =
                     indianUnionTerritories.includes(selectedLocation);
 
                   setVisitorForm((current) => ({
                     ...current,
                     state: isUnionTerritory ? "" : selectedLocation,
-                    union_territory: isUnionTerritory ? selectedLocation : "",
+                    union_territory: isUnionTerritory
+                      ? selectedLocation
+                      : "",
                   }));
                 }}
               >
@@ -1129,7 +1269,9 @@ export default function Dashboard() {
                   if (event.key !== "Enter") return;
 
                   const checkboxes = Array.from(
-                    event.currentTarget.querySelectorAll('input[type="checkbox"]')
+                    event.currentTarget.querySelectorAll(
+                      'input[type="checkbox"]'
+                    )
                   );
 
                   const currentIndex = checkboxes.indexOf(event.target);
@@ -1207,6 +1349,42 @@ export default function Dashboard() {
                 </label>
               </div>
 
+              {/* PREVIOUS / NEXT NAVIGATION */}
+              {editingVisitor && (
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: "15px",
+                    margin: "15px 0",
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => navigateEditVisitor(-1)}
+                    disabled={editNavigationIndex === 0}
+                  >
+                    Previous
+                  </button>
+
+                  <span style={{ fontWeight: 600, color: "#555" }}>
+                    Visitor {editNavigationIndex + 1} of{" "}
+                    {editNavigationList.length}
+                  </span>
+
+                  <button
+                    type="button"
+                    onClick={() => navigateEditVisitor(1)}
+                    disabled={
+                      editNavigationIndex >= editNavigationList.length - 1
+                    }
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+
               <button
                 type="submit"
                 disabled={saving || exhibitions.length === 0}
@@ -1255,7 +1433,9 @@ export default function Dashboard() {
             <div className="visitor-filters">
               <select
                 value={filterExhibition}
-                onChange={(event) => setFilterExhibition(event.target.value)}
+                onChange={(event) =>
+                  setFilterExhibition(event.target.value)
+                }
               >
                 <option value="">All Exhibitions</option>
 
@@ -1331,6 +1511,7 @@ export default function Dashboard() {
         {activeTab === "Follow-ups" && (
           <section className="visitor-section">
             <h2>Follow-up Management</h2>
+
             {visitorList(
               filteredVisitors.filter((v) => v.follow_up_required)
             )}
