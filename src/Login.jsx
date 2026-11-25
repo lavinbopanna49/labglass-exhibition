@@ -5,6 +5,7 @@ import "./Login.css";
 
 import pmecImage from "./assets/pmec.jpg";
 import logoImage from "./assets/labglass_logo.jpg";
+import watermarkLogo from "./assets/hsm-watermark.png";
 
 import photo1 from "./assets/6.webp";
 import photo2 from "./assets/5.webp";
@@ -100,6 +101,16 @@ function Login() {
           src={pmecImage}
           alt="AGI Group - H.S. Martin India"
         />
+        <div className="login-watermark-cluster">
+  {Array.from({ length: 12 }).map((_, index) => (
+    <img
+      key={index}
+      src={watermarkLogo}
+      alt=""
+      className={`watermark-logo watermark-${index + 1}`}
+    />
+  ))}
+</div>
 
         <div className="login-form-container">
           <form className="login-card" onSubmit={handleLogin}>
@@ -108,8 +119,8 @@ function Login() {
               <img src={logoImage} alt="H.S. Martin India" />
             </div>
 
-            <h3>User Login</h3>
-            <p>Sign in to access the exhibition dashboard.</p>
+            <h3>USER LOGIN</h3>
+            <p>Exhibition Dashboard</p>
 
             <label htmlFor="email">Email Address</label>
             <input

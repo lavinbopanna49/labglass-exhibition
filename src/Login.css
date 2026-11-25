@@ -104,18 +104,18 @@
 
 .login-right-panel {
   position: relative;
+  isolation: isolate;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 40px;
-  background: #f7f5f4;
+  background:#e8f1fa;
 }
 
 /* AGI BANNER */
 
-.login-pmec {
   .login-pmec {
   position: absolute;
   top: 25px;
@@ -124,11 +124,105 @@
   max-height: 110px;
   object-fit: contain;
 }
+/* SCATTERED H.S. MARTIN WATERMARK */
+
+.login-watermark-cluster {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(95%, 650px);
+  height: 470px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.watermark-logo {
+  position: absolute;
+  width: 55px;
+  height: auto;
+  opacity: 0.035;
+}
+
+/* Random logo positions */
+
+.watermark-1 {
+  top: 8%;
+  left: 12%;
+  transform: rotate(-18deg);
+}
+
+.watermark-2 {
+  top: 15%;
+  left: 43%;
+  transform: rotate(12deg);
+}
+
+.watermark-3 {
+  top: 5%;
+  right: 10%;
+  transform: rotate(-8deg);
+}
+
+.watermark-4 {
+  top: 35%;
+  left: 5%;
+  transform: rotate(22deg);
+}
+
+.watermark-5 {
+  top: 30%;
+  right: 8%;
+  transform: rotate(-25deg);
+}
+
+.watermark-6 {
+  top: 52%;
+  left: 18%;
+  transform: rotate(9deg);
+}
+
+.watermark-7 {
+  top: 48%;
+  right: 20%;
+  transform: rotate(17deg);
+}
+
+.watermark-8 {
+  bottom: 12%;
+  left: 8%;
+  transform: rotate(-12deg);
+}
+
+.watermark-9 {
+  bottom: 8%;
+  left: 42%;
+  transform: rotate(25deg);
+}
+
+.watermark-10 {
+  bottom: 15%;
+  right: 5%;
+  transform: rotate(-15deg);
+}
+
+.watermark-11 {
+  top: 72%;
+  left: 30%;
+  transform: rotate(8deg);
+}
+
+.watermark-12 {
+  top: 22%;
+  left: 75%;
+  transform: rotate(-30deg);
 }
 
 /* LOGIN FORM */
 
 .login-form-container {
+  position: relative;
+  z-index: 2;
   width: 100%;
   max-width: 390px;
   margin-top: 35px;
@@ -292,4 +386,47 @@
   .rotating-photo {
     transition: none;
   }
+}
+/* Scattered H.S. Martin watermark */
+.login-right-panel {
+  position: relative;
+  isolation: isolate;
+}
+
+.login-watermark-cluster {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(90%, 650px);
+  height: 440px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.watermark-logo {
+  position: absolute;
+  width: 55px;
+  height: auto;
+  opacity: 0.035;
+}
+
+/* Irregular logo positions */
+.watermark-1  { top: 8%; left: 12%; transform: rotate(-18deg); }
+.watermark-2  { top: 15%; left: 43%; transform: rotate(12deg); }
+.watermark-3  { top: 5%; right: 10%; transform: rotate(-8deg); }
+.watermark-4  { top: 35%; left: 5%; transform: rotate(22deg); }
+.watermark-5  { top: 30%; right: 8%; transform: rotate(-25deg); }
+.watermark-6  { top: 52%; left: 18%; transform: rotate(9deg); }
+.watermark-7  { top: 48%; right: 20%; transform: rotate(17deg); }
+.watermark-8  { bottom: 12%; left: 8%; transform: rotate(-12deg); }
+.watermark-9  { bottom: 8%; left: 42%; transform: rotate(25deg); }
+.watermark-10 { bottom: 15%; right: 5%; transform: rotate(-15deg); }
+.watermark-11 { top: 72%; left: 30%; transform: rotate(8deg); }
+.watermark-12 { top: 22%; left: 75%; transform: rotate(-30deg); }
+
+/* Keep login card above watermark */
+.login-form-container {
+  position: relative;
+  z-index: 2;
 }

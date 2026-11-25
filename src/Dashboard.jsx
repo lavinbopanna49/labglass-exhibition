@@ -12,6 +12,10 @@ import {
   ClipboardCheck,
   Search,
   Trash2,
+  Menu,
+  X,
+  LogOut,
+  UserRound,
 } from "lucide-react";
 
 const emptyVisitor = {
@@ -101,9 +105,12 @@ function probabilityLevel(value) {
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("Overview");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(
+  typeof window !== "undefined" ? window.innerWidth > 768 : true
+);
   const [user, setUser] = useState(null);
   const [userRole, setUserRole] = useState("employee");
-
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [exhibitions, setExhibitions] = useState([]);
   const [selectedExhibition, setSelectedExhibition] = useState("");
   const [exhibitionForm, setExhibitionForm] = useState({
@@ -223,6 +230,17 @@ export default function Dashboard() {
       supabase.removeChannel(channel);
     };
   }, []);
+  useEffect(() => {
+  function handleResize() {
+    setIsSidebarOpen(window.innerWidth > 768);
+  }
+
+  window.addEventListener("resize", handleResize);
+
+  return () => {
+    window.removeEventListener("resize", handleResize);
+  };
+}, []);
 
   // HANDLE BROWSER BACK BUTTON
   useEffect(() => {
@@ -718,169 +736,9 @@ export default function Dashboard() {
     "Unknown exhibition";
 
   // VISITOR CARD
-  function visitorCard(
-    visitor,
-    showActions = true,
-    navigationList = visitors
-  ) {
-    const probability = Number(visitor.customer_probability || 0);
-    const level = probabilityLevel(probability);
 
-    return (
-      <div className="stat-card visitor-card" key={visitor.id}>
-        <h3>{visitor.name}</h3>
-
-        <p>
-          <strong>Company:</strong> {visitor.company || "Not provided"}
-        </p>
-
-        <p>
-          <strong>Designation:</strong>{" "}
-          {visitor.designation || "Not provided"}
-        </p>
-
-        <p>
-          <strong>Phone:</strong> {visitor.phone || "Not provided"}
-        </p>
-
-        <p>
-          <strong>Email:</strong> {visitor.email || "Not provided"}
-        </p>
-
-        <p>
-          <strong>Country:</strong> {visitor.country || "Not provided"}
-        </p>
-
-        <p>
-          <strong>State / Union Territory:</strong>{" "}
-          {visitor.state || visitor.union_territory || "Not provided"}
-        </p>
-
-        <p>
-          <strong>Exhibition:</strong>{" "}
-          {exhibitionName(visitor.exhibition_id)}
-        </p>
-
-        <p>
-          <strong>Interests:</strong>{" "}
-          {(visitor.interests || []).join(", ") || "None selected"}
-        </p>
-
-        <p>
-          <strong>Requirements:</strong>{" "}
-          {visitor.requirements || "None"}
-        </p>
-
-        {showActions && (
-          <>
-            <button
-              type="button"
-              onClick={() => editVisitor(visitor, navigationList)}
-            >
-              Edit Visitor
-            </button>
-
-            <button
-              type="button"
-              className="icon-delete-button"
-              title="Delete visitor"
-              aria-label="Delete visitor"
-              onClick={() => deleteVisitor(visitor.id)}
-            >
-              <Trash2 size={18} />
-            </button>
-
-            <div className="probability-panel">
-              <div className="probability-heading">
-                <h4>Probability of Ordering</h4>
-
-                <span className={`probability-badge ${level.toLowerCase()}`}>
-                  {probability}% · {level}
-                </span>
-              </div>
-
-              <input
-                className="probability-slider"
-                type="range"
-                min="0"
-                max="100"
-                step="5"
-                value={probability}
-                style={{ "--probability": `${probability}%` }}
-                onChange={(event) =>
-                  setVisitors((current) =>
-                    current.map((item) =>
-                      item.id === visitor.id
-                        ? {
-                            ...item,
-                            customer_probability: Number(event.target.value),
-                          }
-                        : item
-                    )
-                  )
-                }
-                onPointerUp={(event) =>
-                  updateVisitor(visitor.id, {
-                    customer_probability: Number(event.currentTarget.value),
-                  })
-                }
-              />
-
-              <div className="probability-scale">
-                <span>0% — Unlikely</span>
-                <span>100% — Very likely</span>
-              </div>
-            </div>
-
-            <label>
-              <input
-                type="checkbox"
-                checked={visitor.follow_up_required || false}
-                onChange={(event) =>
-                  updateVisitor(visitor.id, {
-                    follow_up_required: event.target.checked,
-                  })
-                }
-              />
-              Follow-up required
-            </label>
-
-            <label>Follow-up date</label>
-
-            <input
-              type="date"
-              value={visitor.follow_up_date || ""}
-              onChange={(event) =>
-                updateVisitor(visitor.id, {
-                  follow_up_date: event.target.value || null,
-                })
-              }
-            />
-
-            <label>Follow-up notes</label>
-
-            <textarea
-              rows="2"
-              defaultValue={visitor.follow_up_notes || ""}
-              onBlur={(event) =>
-                updateVisitor(visitor.id, {
-                  follow_up_notes: event.target.value,
-                })
-              }
-            />
-          </>
-        )}
-
-        <p>
-          <strong>Registered:</strong>{" "}
-          {visitor.created_at
-            ? new Date(visitor.created_at).toLocaleString()
-            : "Unknown"}
-        </p>
-      </div>
-    );
-  }
-
+  // SPREADSHEET-STYLE VISITOR TABLE
+  
   // DISPLAY VISITOR LIST
   function visitorList(list) {
     if (loading) return <p>Loading records...</p>;
@@ -888,23 +746,120 @@ export default function Dashboard() {
     if (!list.length) return <p>No visitors found.</p>;
 
     return (
-      <div className="visitor-list">
-        {list.map((visitor) =>
-          visitorCard(visitor, true, list)
-        )}
+      <div className="table-scroll">
+        <table className="crm-table">
+          <thead>
+            <tr>
+              <th>Visitor Name</th>
+              <th>Company</th>
+              <th>Designation</th>
+              <th>Phone</th>
+              <th>Email</th>
+              <th>Country</th>
+              <th>State / UT</th>
+              <th>Exhibition</th>
+              <th>Product Interests</th>
+              <th>Requirements</th>
+              <th>Follow-up</th>
+              <th>Registered</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {list.map((visitor) => (
+              <tr key={visitor.id}>
+                <td className="crm-name-cell">
+                  {visitor.name || "—"}
+                </td>
+
+                <td>{visitor.company || "—"}</td>
+                <td>{visitor.designation || "—"}</td>
+                <td>{visitor.phone || "—"}</td>
+                <td>{visitor.email || "—"}</td>
+                <td>{visitor.country || "—"}</td>
+                <td>
+                  {visitor.state || visitor.union_territory || "—"}
+                </td>
+                <td>{exhibitionName(visitor.exhibition_id)}</td>
+                <td>
+                  {(visitor.interests || []).join(", ") || "—"}
+                </td>
+                <td className="crm-notes-cell">
+                  {visitor.requirements || "—"}
+                </td>
+
+                <td>
+                  <label className="crm-inline-control">
+                    <input
+                      type="checkbox"
+                      checked={visitor.follow_up_required || false}
+                      onChange={(event) =>
+                        updateVisitor(visitor.id, {
+                          follow_up_required: event.target.checked,
+                        })
+                      }
+                    />
+                    {visitor.follow_up_required ? "Yes" : "No"}
+                  </label>
+                </td>
+
+                <td>
+                  {visitor.created_at
+                    ? new Date(visitor.created_at).toLocaleDateString()
+                    : "—"}
+                </td>
+
+                <td>
+                  <div className="crm-row-actions">
+                    <button
+                      type="button"
+                      onClick={() => editVisitor(visitor, list)}
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      type="button"
+                      className="icon-delete-button"
+                      title="Delete visitor"
+                      aria-label={`Delete ${visitor.name}`}
+                      onClick={() => deleteVisitor(visitor.id)}
+                    >
+                      <Trash2 size={17} />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     );
   }
 
   return (
     <div className="dashboard">
-      <aside className="sidebar">
+      {isSidebarOpen && window.innerWidth <= 768 && (
+  <button
+    type="button"
+    className="sidebar-overlay"
+    aria-label="Close sidebar"
+    onClick={() => setIsSidebarOpen(false)}
+  />
+)}
+      <aside
+  className={`sidebar ${
+    isSidebarOpen ? "sidebar-open" : "sidebar-closed"
+  }`}
+>
         <div className="sidebar-brand">
-          <div className="sidebar-brand-mark">HSM</div>
-
+          <div className="sidebar-brand-mark">
+           <img src="/hsm-watermark.png" alt="H.S. Martin Logo" /> 
+          </div>
+          <p>Exhibition Dashboard</p>
           <div className="sidebar-brand-text">
-            <h2>H. S. MARTIN</h2>
-            <p>INDIA</p>
+          
           </div>
         </div>
 
@@ -946,8 +901,8 @@ export default function Dashboard() {
 
         <div className="sidebar-profile">
           <div className="sidebar-profile-info">
-            <strong>{user?.email}</strong>
-            <span>Signed in</span>
+            <strong>{userRole === "admin" ? "Admin" : "User"}</strong>
+<small>Signed in</small>
           </div>
 
           <button type="button" onClick={logout}>
@@ -958,17 +913,53 @@ export default function Dashboard() {
 
       <main className="dashboard-main">
         <header className="dashboard-header">
-          <div>
-            <h1>{activeTab}</h1>
-            <p>H. S. Martin India | Exhibition Management</p>
-          </div>
+  <button
+    type="button"
+    className="sidebar-toggle"
+    aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
+    onClick={() => setIsSidebarOpen((open) => !open)}
+  >
+    {isSidebarOpen ? <X size={22} /> : <Menu size={22} />}
+  </button>
 
-          <div>
-            <span className="admin-label">
-              {userRole === "admin" ? "Admin Panel" : "Employee Panel"}
-            </span>
-          </div>
-        </header>
+  <div className="header-title">
+    <h1>{activeTab}</h1>
+  </div>
+
+  <div className="user-menu-container">
+  <button
+    type="button"
+    className="user-menu-trigger"
+    aria-label="Open user profile"
+    onClick={() => setIsUserMenuOpen((open) => !open)}
+  >
+    <span className="user-avatar">
+  <UserRound size={22} />
+</span>
+  </button>
+
+  {isUserMenuOpen && (
+    <div className="user-dropdown">
+      <div className="profile-dropdown-info">
+        <strong>
+          {userRole === "admin" ? "Admin Panel" : "User Panel"}
+        </strong>
+        <small>Signed in</small>
+        <p>{user?.email}</p>
+      </div>
+
+      <button
+        type="button"
+        onClick={logout}
+        className="user-logout-button"
+      >
+        <LogOut size={17} />
+        Logout
+      </button>
+    </div>
+  )}
+</div>
+</header>
 
         {/* OVERVIEW */}
         {activeTab === "Overview" && (
