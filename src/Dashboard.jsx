@@ -747,13 +747,33 @@ const [exhibitionFilterText, setExhibitionFilterText] = useState("");
   // SPREADSHEET-STYLE VISITOR TABLE
   
   // DISPLAY VISITOR LIST
-  function visitorList(list) {
-    if (loading) return <p>Loading records...</p>;
-    if (error) return <p>Database message: {error}</p>;
-    if (!list.length) return <p>No visitors found.</p>;
+ function visitorList(list) {
+  if (loading) return <p>Loading records...</p>;
+  if (error) return <p>Database message: {error}</p>;
+  if (!list.length) return <p>No visitors found.</p>;
 
-    return (
-      <div className="table-scroll">
+  return (
+    <div className="table-scroll-wrapper">
+
+      {/* TOP HORIZONTAL SCROLLBAR */}
+      <div
+        className="table-scroll-top"
+        onScroll={(event) => {
+          const bottom = event.currentTarget.nextElementSibling;
+          if (bottom) bottom.scrollLeft = event.currentTarget.scrollLeft;
+        }}
+      >
+        <div className="table-scroll-top-inner"></div>
+      </div>
+
+      {/* MAIN TABLE */}
+      <div
+        className="table-scroll"
+        onScroll={(event) => {
+          const top = event.currentTarget.previousElementSibling;
+          if (top) top.scrollLeft = event.currentTarget.scrollLeft;
+        }}
+      >
         <table className="crm-table">
           <thead>
             <tr>
@@ -785,13 +805,17 @@ const [exhibitionFilterText, setExhibitionFilterText] = useState("");
                 <td>{visitor.phone || "—"}</td>
                 <td>{visitor.email || "—"}</td>
                 <td>{visitor.country || "—"}</td>
+
                 <td>
                   {visitor.state || visitor.union_territory || "—"}
                 </td>
+
                 <td>{exhibitionName(visitor.exhibition_id)}</td>
+
                 <td>
                   {(visitor.interests || []).join(", ") || "—"}
                 </td>
+
                 <td className="crm-notes-cell">
                   {visitor.requirements || "—"}
                 </td>
@@ -842,8 +866,10 @@ const [exhibitionFilterText, setExhibitionFilterText] = useState("");
           </tbody>
         </table>
       </div>
-    );
-  }
+
+    </div>
+  );
+}
 
   return (
     <div className="dashboard">
@@ -908,13 +934,8 @@ const [exhibitionFilterText, setExhibitionFilterText] = useState("");
 
         <div className="sidebar-profile">
           <div className="sidebar-profile-info">
-            <strong>{userRole === "admin" ? "Admin" : "User"}</strong>
-<small>Signed in</small>
           </div>
 
-          <button type="button" onClick={logout}>
-            Logout
-          </button>
         </div>
       </aside>
 
@@ -1018,94 +1039,145 @@ const [exhibitionFilterText, setExhibitionFilterText] = useState("");
           </>
         )}
 
-        {/* EXHIBITIONS */}
+               {/* EXHIBITIONS */}
         {activeTab === "Exhibitions" && (
-          <section className="visitor-section">
-            <h2>Create New Exhibition</h2>
+          <section className="visitor-section exhibitions-page">
 
-            <form
-              className="visitor-entry-form"
-              onSubmit={createExhibition}
-            >
-              <label>Exhibition Name *</label>
+            {/* AVAILABLE EXHIBITIONS FIRST */}
+            <div className="exhibitions-heading">
+              <div>
+                <h2>Available Exhibitions</h2>
+                <p>Select an exhibition to view its visitors.</p>
+              </div>
 
-              <input
-                required
-                value={exhibitionForm.exhibition_name}
-                onChange={(event) =>
-                  setExhibitionForm((current) => ({
-                    ...current,
-                    exhibition_name: event.target.value,
-                  }))
-                }
-              />
-
-              <label>Location *</label>
-
-              <input
-                required
-                value={exhibitionForm.location}
-                onChange={(event) =>
-                  setExhibitionForm((current) => ({
-                    ...current,
-                    location: event.target.value,
-                  }))
-                }
-              />
-
-              <label>Year *</label>
-
-              <input
-                required
-                type="number"
-                min="2000"
-                max="2100"
-                value={exhibitionForm.year}
-                onChange={(event) =>
-                  setExhibitionForm((current) => ({
-                    ...current,
-                    year: event.target.value,
-                  }))
-                }
-              />
-
-              <button type="submit" disabled={saving}>
-                {saving ? "Creating..." : "Create Exhibition"}
-              </button>
-            </form>
-
-            <h2>Available Exhibitions</h2>
+              <span className="exhibition-count">
+                {exhibitions.length} Exhibitions
+              </span>
+            </div>
 
             {exhibitions.length === 0 ? (
               <p>No exhibitions have been created yet.</p>
             ) : (
-              exhibitions.map((exhibition) => (
-                <div
-                  className="stat-card exhibition-card"
-                  key={exhibition.id}
-                >
-                  <div>
-                    <h3>{exhibition.exhibition_name}</h3>
-                    <p>Location: {exhibition.location}</p>
-                    <p>Year: {exhibition.year}</p>
-                  </div>
+              <div className="exhibitions-grid">
+                {exhibitions.map((exhibition) => {
+                  const visitorCount = visitors.filter(
+                    (visitor) => visitor.exhibition_id === exhibition.id
+                  ).length;
 
-                  <button
-                    type="button"
-                    className="icon-delete-button"
-                    title="Delete exhibition"
-                    aria-label="Delete exhibition"
-                    onClick={(event) => {
-                      event.preventDefault();
-                      event.stopPropagation();
-                      deleteExhibition(exhibition);
-                    }}
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </div>
-              ))
+                  return (
+                    <div className="exhibition-card-wrapper" key={exhibition.id}>
+
+                      <button
+                        type="button"
+                        className="exhibition-card-button"
+                        onClick={() => {
+                          setFilterExhibition(exhibition.id);
+                          setSearch("");
+                          setFilterCompany("");
+                          setFilterState("");
+                          setActiveTab("All Visitors");
+                        }}
+                      >
+                        <div className="exhibition-card-top">
+                          <span className="exhibition-card-icon">
+                            <CalendarDays size={22} />
+                          </span>
+
+                          <span className="exhibition-card-arrow">
+                            View Visitors →
+                          </span>
+                        </div>
+
+                        <h3>{exhibition.exhibition_name}</h3>
+
+                        <p className="exhibition-location">
+                          {exhibition.location || "Location not specified"}
+                        </p>
+
+                        <div className="exhibition-card-footer">
+                          <span>{exhibition.year}</span>
+                          <span>
+                            <Users size={15} />
+                            {visitorCount} Visitors
+                          </span>
+                        </div>
+                      </button>
+
+                      <button
+                        type="button"
+                        className="exhibition-delete-button"
+                        title="Delete exhibition"
+                        aria-label={`Delete ${exhibition.exhibition_name}`}
+                        onClick={() => deleteExhibition(exhibition)}
+                      >
+                        <Trash2 size={17} />
+                      </button>
+
+                    </div>
+                  );
+                })}
+              </div>
             )}
+
+            {/* CREATE EXHIBITION BELOW */}
+            <div className="create-exhibition-section">
+              <div>
+                <h2>Create New Exhibition</h2>
+                <p>Add a new exhibition to your records.</p>
+              </div>
+
+              <form
+                className="visitor-entry-form"
+                onSubmit={createExhibition}
+              >
+                <label>Exhibition Name *</label>
+
+                <input
+                  required
+                  value={exhibitionForm.exhibition_name}
+                  onChange={(event) =>
+                    setExhibitionForm((current) => ({
+                      ...current,
+                      exhibition_name: event.target.value,
+                    }))
+                  }
+                />
+
+                <label>Location *</label>
+
+                <input
+                  required
+                  value={exhibitionForm.location}
+                  onChange={(event) =>
+                    setExhibitionForm((current) => ({
+                      ...current,
+                      location: event.target.value,
+                    }))
+                  }
+                />
+
+                <label>Year *</label>
+
+                <input
+                  required
+                  type="number"
+                  min="2000"
+                  max="2100"
+                  value={exhibitionForm.year}
+                  onChange={(event) =>
+                    setExhibitionForm((current) => ({
+                      ...current,
+                      year: event.target.value,
+                    }))
+                  }
+                />
+
+                <button type="submit" disabled={saving}>
+                  {saving ? "Creating..." : "Create Exhibition"}
+                </button>
+              </form>
+            </div>
+
           </section>
         )}
 
@@ -1538,13 +1610,95 @@ const [exhibitionFilterText, setExhibitionFilterText] = useState("");
           </section>
         )}
 
-        {/* FOLLOW-UPS */}
+                {/* FOLLOW-UPS */}
         {activeTab === "Follow-ups" && (
           <section className="visitor-section">
             <h2>Follow-up Management</h2>
 
-            {visitorList(
-              filteredVisitors.filter((v) => v.follow_up_required)
+            {loading ? (
+              <p>Loading follow-ups...</p>
+            ) : error ? (
+              <p>Database message: {error}</p>
+            ) : (
+              (() => {
+                const followUpVisitors = filteredVisitors.filter(
+                  (visitor) => visitor.follow_up_required
+                );
+
+                if (followUpVisitors.length === 0) {
+                  return <p>No follow-ups required.</p>;
+                }
+
+                return (
+                  <div className="table-scroll">
+                    <table className="crm-table">
+                      <thead>
+                        <tr>
+                          <th>Visitor Name</th>
+                          <th>Company</th>
+                          <th>Phone</th>
+                          <th>Exhibition</th>
+                          <th>Follow-up Date</th>
+                          <th>Follow-up Notes</th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        {followUpVisitors.map((visitor) => (
+                          <tr key={visitor.id}>
+                            <td className="crm-name-cell">
+                              {visitor.name || "—"}
+                            </td>
+
+                            <td>{visitor.company || "—"}</td>
+
+                            <td>{visitor.phone || "—"}</td>
+
+                            <td>
+                              {exhibitionName(visitor.exhibition_id)}
+                            </td>
+
+                            <td>
+                             <input
+  type="date"
+  className="follow-up-date-input"
+  defaultValue={visitor.follow_up_date || ""}
+  onBlur={(event) => {
+    const value = event.target.value;
+
+    if (value !== (visitor.follow_up_date || "")) {
+      updateVisitor(visitor.id, {
+        follow_up_date: value || null,
+      });
+    }
+  }}
+/>
+                            </td>
+
+                            <td>
+                              <textarea
+                                className="follow-up-notes-input" 
+                                defaultValue={visitor.follow_up_notes || ""}
+                                placeholder="Enter follow-up notes..."
+                                rows={2}
+                                onBlur={(event) => {
+                                  const value = event.target.value;
+
+                                  if (value !== (visitor.follow_up_notes || "")) {
+                                    updateVisitor(visitor.id, {
+                                      follow_up_notes: value,
+                                    });
+                                  }
+                                }}
+                              />
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                );
+              })()
             )}
           </section>
         )}

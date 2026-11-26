@@ -4412,3 +4412,314 @@ body {
   border-color: #4386c5;
   box-shadow: 0 0 0 3px rgba(67, 134, 197, 0.12);
 }
+/* BETTER VISITOR TABLE SCROLLING */
+
+.table-scroll {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #8ba8c7 #edf2f7;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  cursor: grab;
+}
+
+.table-scroll:active {
+  cursor: grabbing;
+}
+
+/* Visible horizontal scrollbar */
+.table-scroll::-webkit-scrollbar {
+  height: 12px;
+  width: 8px;
+}
+
+.table-scroll::-webkit-scrollbar-track {
+  background: #edf2f7;
+  border-radius: 10px;
+}
+
+.table-scroll::-webkit-scrollbar-thumb {
+  background: #8ba8c7;
+  border-radius: 10px;
+  border: 2px solid #edf2f7;
+}
+
+.table-scroll::-webkit-scrollbar-thumb:hover {
+  background: #557da5;
+}
+
+/* Keep table headings visible vertically */
+.crm-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+/* TOP AND BOTTOM SYNCHRONISED SCROLLBARS */
+
+.table-scroll-wrapper {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.table-scroll-top {
+  width: 100%;
+  height: 16px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  margin-bottom: 5px;
+  scrollbar-width: thin;
+  scrollbar-color: #8ba8c7 #edf2f7;
+}
+
+.table-scroll-top-inner {
+  height: 1px;
+  width: 1600px;
+}
+
+.table-scroll-top::-webkit-scrollbar,
+.table-scroll::-webkit-scrollbar {
+  height: 12px;
+}
+
+.table-scroll-top::-webkit-scrollbar-track,
+.table-scroll::-webkit-scrollbar-track {
+  background: #edf2f7;
+  border-radius: 10px;
+}
+
+.table-scroll-top::-webkit-scrollbar-thumb,
+.table-scroll::-webkit-scrollbar-thumb {
+  background: #8ba8c7;
+  border-radius: 10px;
+}
+
+.table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+/* FOLLOW-UP DATE FIELD */
+.follow-up-date-input {
+  width: 155px;
+  min-width: 155px;
+  padding: 10px 12px;
+  border: 1px solid #dce2ea;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #263445;
+  font-family: inherit;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.follow-up-date-input:focus {
+  border-color: #3978d6;
+  box-shadow: 0 0 0 3px rgba(57, 120, 214, 0.12);
+}
+
+/* FOLLOW-UP NOTES FIELD */
+.follow-up-notes-input {
+  width: 230px;
+  min-width: 230px;
+  min-height: 65px;
+  padding: 10px 12px;
+  border: 1px solid #dce2ea;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #263445;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.follow-up-notes-input::placeholder {
+  color: #9aa5b3;
+}
+
+.follow-up-notes-input:focus {
+  border-color: #3978d6;
+  box-shadow: 0 0 0 3px rgba(57, 120, 214, 0.12);
+}
+
+/* FOLLOW-UP TABLE CELLS */
+.crm-table td {
+  vertical-align: middle;
+}
+/* EXHIBITIONS PAGE */
+.exhibitions-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.exhibitions-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+}
+
+.exhibitions-heading h2,
+.create-exhibition-section h2 {
+  margin: 0 0 6px;
+  color: #1e293b;
+  font-size: 21px;
+}
+
+.exhibitions-heading p,
+.create-exhibition-section p {
+  margin: 0;
+  color: #7b8798;
+  font-size: 13px;
+}
+
+.exhibition-count {
+  padding: 7px 13px;
+  background: #eef4ff;
+  color: #3269bd;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* EXHIBITION CARD GRID */
+.exhibitions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 18px;
+}
+
+.exhibition-card-wrapper {
+  position: relative;
+  min-width: 0;
+}
+
+.exhibition-card-button {
+  width: 100%;
+  min-height: 175px;
+  padding: 20px;
+  text-align: left;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #263445;
+}
+
+.exhibition-card-button:hover {
+  border-color: #3978d6;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 22px rgba(30, 64, 120, 0.09);
+}
+
+.exhibition-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 17px;
+  padding-right: 24px;
+}
+
+.exhibition-card-icon {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: #eef4ff;
+  color: #3978d6;
+}
+
+.exhibition-card-arrow {
+  color: #3978d6;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.exhibition-card-button h3 {
+  margin: 0 0 6px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.exhibition-location {
+  margin: 0;
+  color: #7b8798;
+  font-size: 13px;
+}
+
+.exhibition-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding-top: 13px;
+  border-top: 1px solid #edf0f4;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.exhibition-card-footer span:last-child {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #3978d6;
+  font-weight: 600;
+}
+
+/* DELETE BUTTON */
+.exhibition-delete-button {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 7px;
+  background: #fff1f1;
+  color: #dc4545;
+  cursor: pointer;
+  z-index: 2;
+  transition: background 0.2s ease;
+}
+
+.exhibition-delete-button:hover {
+  background: #ffe0e0;
+}
+
+/* CREATE EXHIBITION SECTION */
+.create-exhibition-section {
+  margin-top: 8px;
+  padding-top: 25px;
+  border-top: 1px solid #e8edf3;
+}
+
+.create-exhibition-section .visitor-entry-form {
+  margin-top: 20px;
+}
+
+@media (max-width: 600px) {
+  .exhibitions-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .exhibitions-heading {
+    align-items: flex-start;
+  }
+}
