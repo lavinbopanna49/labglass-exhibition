@@ -16,7 +16,13 @@ import {
   X,
   LogOut,
   UserRound,
+  SlidersHorizontal,
+Building2,
+MapPin,
+ArrowUpDown,
+ArrowDown,
 } from "lucide-react";
+
 
 const emptyVisitor = {
   name: "",
@@ -104,6 +110,7 @@ function probabilityLevel(value) {
 }
 
 export default function Dashboard() {
+const [exhibitionFilterText, setExhibitionFilterText] = useState("");
   const [activeTab, setActiveTab] = useState("Overview");
   const [isSidebarOpen, setIsSidebarOpen] = useState(
   typeof window !== "undefined" ? window.innerWidth > 768 : true
@@ -1410,83 +1417,116 @@ export default function Dashboard() {
                 {exporting ? "Preparing..." : "Export Excel"}
               </button>
             </div>
+           
+<div className="visitor-toolbar">
+  <div className="visitor-search toolbar-search">
+    <Search size={19} />
+    <input
+      placeholder="Search by name, company, email or phone..."
+      value={search}
+      onChange={(event) => setSearch(event.target.value)}
+    />
+  </div>
 
-            <div className="visitor-search">
-              <Search size={18} />
+  
+<div className="visitor-filter-grid">
 
-              <input
-                placeholder="Search by name, company, email or phone..."
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-              />
-            </div>
+  {/* EXHIBITION SEARCH */}
+  <label className="visitor-filter-field">
+    <span><CalendarDays size={15} /> Exhibition</span>
+    <input
+      type="text"
+      list="exhibition-options"
+      placeholder="All Exhibitions"
+      value={exhibitionFilterText}
+      onChange={(event) => {
+        const value = event.target.value;
+        setExhibitionFilterText(value);
 
-            <div className="visitor-filters">
-              <select
-                value={filterExhibition}
-                onChange={(event) =>
-                  setFilterExhibition(event.target.value)
-                }
-              >
-                <option value="">All Exhibitions</option>
+        const selected = exhibitions.find(
+          (item) =>
+            item.exhibition_name.toLowerCase() === value.trim().toLowerCase()
+        );
 
-                {exhibitions.map((exhibition) => (
-                  <option key={exhibition.id} value={exhibition.id}>
-                    {exhibition.exhibition_name}
-                  </option>
-                ))}
-              </select>
+        setFilterExhibition(selected ? selected.id : "");
+      }}
+    />
+    <datalist id="exhibition-options">
+      {exhibitions.map((item) => (
+        <option key={item.id} value={item.exhibition_name} />
+      ))}
+    </datalist>
+  </label>
 
-              <select
-                value={filterCompany}
-                onChange={(event) => setFilterCompany(event.target.value)}
-              >
-                <option value="">All Companies</option>
+  {/* COMPANY SEARCH */}
+  <label className="visitor-filter-field">
+    <span><Building2 size={15} /> Company</span>
+    <input
+      type="text"
+      list="company-options"
+      placeholder="All Companies"
+      value={filterCompany}
+      onChange={(event) => setFilterCompany(event.target.value)}
+    />
+    <datalist id="company-options">
+      {[...new Set(visitors.map((v) => v.company).filter(Boolean))]
+        .sort()
+        .map((company) => (
+          <option key={company} value={company} />
+        ))}
+    </datalist>
+  </label>
 
-                {[...new Set(visitors.map((v) => v.company).filter(Boolean))]
-                  .sort()
-                  .map((company) => (
-                    <option key={company} value={company}>
-                      {company}
-                    </option>
-                  ))}
-              </select>
+  {/* STATE SEARCH */}
+  <label className="visitor-filter-field">
+    <span><MapPin size={15} /> State / UT</span>
+    <input
+      type="text"
+      list="state-options"
+      placeholder="All States"
+      value={filterState}
+      onChange={(event) => setFilterState(event.target.value)}
+    />
+    <datalist id="state-options">
+      {[...new Set(visitors.map((v) => v.state).filter(Boolean))]
+        .sort()
+        .map((state) => (
+          <option key={state} value={state} />
+        ))}
+    </datalist>
+  </label>
 
-              <select
-                value={filterState}
-                onChange={(event) => setFilterState(event.target.value)}
-              >
-                <option value="">All States</option>
+  {/* SORT BY */}
+  <label className="visitor-filter-field">
+    <span><SlidersHorizontal size={15} /> Sort by</span>
+    <select
+      value={sortBy}
+      onChange={(event) => setSortBy(event.target.value)}
+    >
+      <option value="created_at">Date Added</option>
+      <option value="name">Visitor Name</option>
+      <option value="company">Company</option>
+      <option value="exhibition">Exhibition</option>
+    </select>
+  </label>
 
-                {[...new Set(visitors.map((v) => v.state).filter(Boolean))]
-                  .sort()
-                  .map((state) => (
-                    <option key={state} value={state}>
-                      {state}
-                    </option>
-                  ))}
-              </select>
+  {/* SORT DIRECTION */}
+  <label className="visitor-filter-field">
+    <span><ArrowDown size={15} /> Direction</span>
+    <select
+      value={sortOrder}
+      onChange={(event) => setSortOrder(event.target.value)}
+    >
+      <option value="desc">Newest / Z–A</option>
+      <option value="asc">Oldest / A–Z</option>
+    </select>
+  </label>
 
-              <select
-                value={sortBy}
-                onChange={(event) => setSortBy(event.target.value)}
-              >
-                <option value="created_at">Date Added</option>
-                <option value="company">Company</option>
-                <option value="exhibition">Exhibition</option>
-                <option value="name">Visitor Name</option>
-              </select>
+</div>
 
-              <select
-                value={sortOrder}
-                onChange={(event) => setSortOrder(event.target.value)}
-              >
-                <option value="asc">Ascending</option>
-                <option value="desc">Descending</option>
-              </select>
-            </div>
+</div>
+{visitorList(filteredVisitors)}
 
-            {visitorList(filteredVisitors)}
           </section>
         )}
 
