@@ -4723,3 +4723,21 @@ body {
     align-items: flex-start;
   }
 }
+/* FIX TOP SCROLLBAR JITTER AND WIDTH */
+.table-scroll-top {
+  scroll-behavior: auto !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  overscroll-behavior-x: contain;
+}
+
+.table-scroll-top-inner {
+  display: block;
+  height: 1px;
+  min-width: 0;
+}
+
+.table-scroll {
+  scroll-behavior: auto !important;
+  overscroll-behavior-x: contain;
+}

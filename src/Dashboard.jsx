@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import ExcelJS from "exceljs";
 import "./Dashboard.css";
 import { supabase } from "./supabase";
@@ -110,6 +110,7 @@ function probabilityLevel(value) {
 }
 
 export default function Dashboard() {
+  const tableScrollWrapperRef = useRef(null);
 const [exhibitionFilterText, setExhibitionFilterText] = useState("");
   const [activeTab, setActiveTab] = useState("Overview");
   const [isSidebarOpen, setIsSidebarOpen] = useState(
@@ -313,7 +314,7 @@ const [exhibitionFilterText, setExhibitionFilterText] = useState("");
     });
 
     alert("Exhibition created successfully.");
-    setActiveTab("New Visitor");
+    startNewVisitor();
   }
 
   // DELETE EXHIBITION
@@ -554,6 +555,16 @@ const [exhibitionFilterText, setExhibitionFilterText] = useState("");
     setEditNavigationIndex(0);
     setActiveTab("All Visitors");
   }
+ 
+// START A COMPLETELY NEW VISITOR
+function startNewVisitor() {
+  setEditingVisitor(null);
+  setVisitorForm(emptyVisitor);
+  setEditNavigationList([]);
+  setEditNavigationIndex(0);
+  setActiveTab("New Visitor");
+}
+
 
   // UPDATE VISITOR
   async function updateVisitor(visitorId, updates) {
@@ -738,9 +749,37 @@ const [exhibitionFilterText, setExhibitionFilterText] = useState("");
       return sortOrder === "asc" ? comparison : -comparison;
     });
 
-  const exhibitionName = (id) =>
-    exhibitions.find((item) => item.id === id)?.exhibition_name ||
-    "Unknown exhibition";
+// ADD THE SCROLL WIDTH EFFECT HERE
+// KEEP TOP AND BOTTOM SCROLLBAR WIDTHS MATCHED
+useEffect(() => {
+  const wrapper = tableScrollWrapperRef.current;
+  if (!wrapper) return;
+
+  const top = wrapper.querySelector(".table-scroll-top");
+  const bottom = wrapper.querySelector(".table-scroll");
+  const table = wrapper.querySelector(".crm-table");
+  const topInner = wrapper.querySelector(".table-scroll-top-inner");
+
+  if (!top || !bottom || !table || !topInner) return;
+
+  const updateWidth = () => {
+  const maxScroll = bottom.scrollWidth - bottom.clientWidth;
+  topInner.style.width = `${maxScroll + top.clientWidth}px`;
+};
+
+  updateWidth();
+
+  const observer = new ResizeObserver(updateWidth);
+  observer.observe(table);
+  observer.observe(bottom);
+  observer.observe(top);
+
+  return () => observer.disconnect();
+}, [activeTab, visitors.length, filteredVisitors.length]);
+
+const exhibitionName = (id) =>
+  exhibitions.find((item) => item.id === id)?.exhibition_name ||
+  "Unknown exhibition";
 
   // VISITOR CARD
 
@@ -753,7 +792,10 @@ const [exhibitionFilterText, setExhibitionFilterText] = useState("");
   if (!list.length) return <p>No visitors found.</p>;
 
   return (
-    <div className="table-scroll-wrapper">
+   <div
+  className="table-scroll-wrapper"
+  ref={tableScrollWrapperRef}
+>
 
       {/* TOP HORIZONTAL SCROLLBAR */}
       <div
@@ -811,6 +853,53 @@ const [exhibitionFilterText, setExhibitionFilterText] = useState("");
                 </td>
 
                 <td>{exhibitionName(visitor.exhibition_id)}</td>
+                {/* Visit Required */}
+<td>
+  <label className="crm-inline-control">
+    <input
+      type="checkbox"
+      checked={visitor.visit_required || false}
+      onChange={(event) =>
+        updateVisitor(visitor.id, {
+          visit_required: event.target.checked,
+        })
+      }
+    />
+    {visitor.visit_required ? "Yes" : "No"}
+  </label>
+</td>
+
+{/* Brochure Sent */}
+<td>
+  <label className="crm-inline-control">
+    <input
+      type="checkbox"
+      checked={visitor.send_brochures || false}
+      onChange={(event) =>
+        updateVisitor(visitor.id, {
+          send_brochures: event.target.checked,
+        })
+      }
+    />
+    {visitor.send_brochures ? "Yes" : "No"}
+  </label>
+</td>
+
+{/* Order Placed */}
+<td>
+  <label className="crm-inline-control">
+    <input
+      type="checkbox"
+      checked={visitor.order_placed || false}
+      onChange={(event) =>
+        updateVisitor(visitor.id, {
+          order_placed: event.target.checked,
+        })
+      }
+    />
+    {visitor.order_placed ? "Yes" : "No"}
+  </label>
+</td>
 
                 <td>
                   {(visitor.interests || []).join(", ") || "—"}
@@ -913,17 +1002,23 @@ const [exhibitionFilterText, setExhibitionFilterText] = useState("");
                 type="button"
                 key={item.name}
                 className={`menu-item ${activeTab === item.name ? "active" : ""}`}
-                onClick={() => {
-                  if (window.history.state?.appScreen !== "dashboard") {
-                    window.history.pushState(
-                      { appScreen: "dashboard" },
-                      "",
-                      window.location.href
-                    );
-                  }
+                
+onClick={() => {
+  if (window.history.state?.appScreen !== "dashboard") {
+    window.history.pushState(
+      { appScreen: "dashboard" },
+      "",
+      window.location.href
+    );
+  }
 
-                  setActiveTab(item.name);
-                }}
+  if (item.name === "New Visitor") {
+    startNewVisitor();
+  } else {
+    setActiveTab(item.name);
+  }
+}}
+
               >
                 <Icon size={18} />
                 <span>{item.name}</span>
@@ -1084,7 +1179,7 @@ const [exhibitionFilterText, setExhibitionFilterText] = useState("");
                           </span>
 
                           <span className="exhibition-card-arrow">
-                            View Visitors →
+
                           </span>
                         </div>
 
@@ -1634,12 +1729,15 @@ const [exhibitionFilterText, setExhibitionFilterText] = useState("");
                     <table className="crm-table">
                       <thead>
                         <tr>
-                          <th>Visitor Name</th>
-                          <th>Company</th>
-                          <th>Phone</th>
-                          <th>Exhibition</th>
-                          <th>Follow-up Date</th>
-                          <th>Follow-up Notes</th>
+                            <th>Visitor Name</th>
+    <th>Company</th>
+    <th>Phone</th>
+    <th>Exhibition</th>
+    <th>Visit Required</th>
+    <th>Brochure Sent</th>
+    <th>Order Placed</th>
+    <th>Follow-up Date</th>
+    <th>Follow-up Notes</th>
                         </tr>
                       </thead>
 
@@ -1657,6 +1755,53 @@ const [exhibitionFilterText, setExhibitionFilterText] = useState("");
                             <td>
                               {exhibitionName(visitor.exhibition_id)}
                             </td>
+                            {/* Visit Required */}
+<td>
+  <label className="crm-inline-control">
+    <input
+      type="checkbox"
+      checked={visitor.visit_required || false}
+      onChange={(event) =>
+        updateVisitor(visitor.id, {
+          visit_required: event.target.checked,
+        })
+      }
+    />
+    {visitor.visit_required ? "Yes" : "No"}
+  </label>
+</td>
+
+{/* Brochure Sent */}
+<td>
+  <label className="crm-inline-control">
+    <input
+      type="checkbox"
+      checked={visitor.send_brochures || false}
+      onChange={(event) =>
+        updateVisitor(visitor.id, {
+          send_brochures: event.target.checked,
+        })
+      }
+    />
+    {visitor.send_brochures ? "Yes" : "No"}
+  </label>
+</td>
+
+{/* Order Placed */}
+<td>
+  <label className="crm-inline-control">
+    <input
+      type="checkbox"
+      checked={visitor.order_placed || false}
+      onChange={(event) =>
+        updateVisitor(visitor.id, {
+          order_placed: event.target.checked,
+        })
+      }
+    />
+    {visitor.order_placed ? "Yes" : "No"}
+  </label>
+</td>
 
                             <td>
                              <input
@@ -1711,11 +1856,13 @@ const [exhibitionFilterText, setExhibitionFilterText] = useState("");
 
             {loading ? (
               <p>Loading visitor records...</p>
-            ) : visitors.length === 0 ? (
+           ) : !visitors.some((visitor) => visitor.order_placed === true) ? (
               <p>No visitor records found.</p>
             ) : (
               <div className="visitor-list">
-                {visitors.map((visitor) => (
+                {visitors
+  .filter((visitor) => visitor.order_placed === true)
+  .map((visitor) => (
                   <div
                     className="stat-card visitor-card"
                     key={visitor.id}
