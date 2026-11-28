@@ -4741,3 +4741,250 @@ body {
   scroll-behavior: auto !important;
   overscroll-behavior-x: contain;
 }
+/* VISITOR ANALYTICS PAGE */
+
+.analytics-link-card {
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  border: 1px solid #e5eaf1;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.analytics-link-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 22px rgba(25, 45, 75, 0.09);
+}
+
+.analytics-link-card span {
+  display: block;
+  margin-top: 10px;
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.analytics-page {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.analytics-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.analytics-heading h2 {
+  margin-bottom: 6px;
+}
+
+.analytics-heading p,
+.analytics-panel > p {
+  color: #718096;
+  font-size: 13px;
+}
+
+.analytics-heading button {
+  padding: 10px 16px;
+  border: 1px solid #dce4ef;
+  border-radius: 8px;
+  background: white;
+  color: #334155;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.analytics-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.analytics-summary-card,
+.analytics-panel {
+  background: white;
+  border: 1px solid #e7ecf2;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.analytics-summary-card {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.analytics-summary-card span,
+.analytics-order-grid span {
+  color: #718096;
+  font-size: 13px;
+}
+
+.analytics-summary-card strong {
+  color: #1e293b;
+  font-size: 25px;
+}
+
+.analytics-summary-card small {
+  color: #718096;
+  font-size: 11px;
+}
+
+.analytics-panel h3 {
+  margin: 0 0 7px;
+  color: #1e293b;
+  font-size: 16px;
+}
+
+.analytics-monthly-chart {
+  height: 230px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  gap: 14px;
+  padding: 20px 5px 0;
+}
+
+.analytics-month-column {
+  height: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.analytics-month-column strong {
+  font-size: 12px;
+  color: #475569;
+}
+
+.analytics-month-column > span {
+  color: #718096;
+  font-size: 12px;
+}
+
+.analytics-month-bar-area {
+  height: 150px;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  border-bottom: 1px solid #e5eaf1;
+}
+
+.analytics-month-bar {
+  width: min(42px, 70%);
+  min-height: 2px;
+  background: #3978d4;
+  border-radius: 6px 6px 0 0;
+}
+
+.analytics-two-column {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+
+.analytics-ranking-list {
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+  margin-top: 22px;
+}
+
+.analytics-ranking-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 7px;
+  font-size: 12px;
+  color: #475569;
+}
+
+.analytics-ranking-label strong {
+  color: #1e293b;
+}
+
+.analytics-ranking-track {
+  height: 8px;
+  width: 100%;
+  overflow: hidden;
+  background: #edf1f6;
+  border-radius: 10px;
+}
+
+.analytics-ranking-fill {
+  height: 100%;
+  background: #3978d4;
+  border-radius: 10px;
+}
+
+.state-ranking-fill {
+  background: #20a58a;
+}
+
+.analytics-order-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.analytics-order-grid > div {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 15px;
+  background: #f7f9fc;
+  border-radius: 9px;
+}
+
+.analytics-order-grid strong {
+  font-size: 19px;
+  color: #1e293b;
+}
+
+@media (max-width: 900px) {
+  .analytics-summary-grid,
+  .analytics-order-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .analytics-two-column {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 550px) {
+  .analytics-summary-grid,
+  .analytics-order-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .analytics-monthly-chart {
+    gap: 6px;
+  }
+}
+.company-name-link {
+  border: none;
+  padding: 0;
+  background: transparent;
+  color: #2563a8;
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.company-name-link:hover {
+  color: #174578;
+  text-decoration: underline;
+}

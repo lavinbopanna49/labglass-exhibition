@@ -136,6 +136,7 @@ const [exhibitionFilterText, setExhibitionFilterText] = useState("");
   const [editNavigationIndex, setEditNavigationIndex] = useState(0);
 
   const [search, setSearch] = useState("");
+  const [companyDirectorySearch, setCompanyDirectorySearch] = useState("");
   const [filterExhibition, setFilterExhibition] = useState("");
   const [filterCompany, setFilterCompany] = useState("");
   const [filterYear, setFilterYear] = useState("");
@@ -706,7 +707,9 @@ function startNewVisitor() {
         !filterExhibition || visitor.exhibition_id === filterExhibition;
 
       const matchesCompany =
-        !filterCompany || visitor.company === filterCompany;
+  !filterCompany ||
+  (visitor.company || "").trim().toLowerCase() ===
+    filterCompany.trim().toLowerCase();
 
       const matchesState =
         !filterState || visitor.state === filterState;
@@ -853,53 +856,6 @@ const exhibitionName = (id) =>
                 </td>
 
                 <td>{exhibitionName(visitor.exhibition_id)}</td>
-                {/* Visit Required */}
-<td>
-  <label className="crm-inline-control">
-    <input
-      type="checkbox"
-      checked={visitor.visit_required || false}
-      onChange={(event) =>
-        updateVisitor(visitor.id, {
-          visit_required: event.target.checked,
-        })
-      }
-    />
-    {visitor.visit_required ? "Yes" : "No"}
-  </label>
-</td>
-
-{/* Brochure Sent */}
-<td>
-  <label className="crm-inline-control">
-    <input
-      type="checkbox"
-      checked={visitor.send_brochures || false}
-      onChange={(event) =>
-        updateVisitor(visitor.id, {
-          send_brochures: event.target.checked,
-        })
-      }
-    />
-    {visitor.send_brochures ? "Yes" : "No"}
-  </label>
-</td>
-
-{/* Order Placed */}
-<td>
-  <label className="crm-inline-control">
-    <input
-      type="checkbox"
-      checked={visitor.order_placed || false}
-      onChange={(event) =>
-        updateVisitor(visitor.id, {
-          order_placed: event.target.checked,
-        })
-      }
-    />
-    {visitor.order_placed ? "Yes" : "No"}
-  </label>
-</td>
 
                 <td>
                   {(visitor.interests || []).join(", ") || "—"}
@@ -1088,24 +1044,43 @@ onClick={() => {
         {activeTab === "Overview" && (
           <>
             <section className="stats">
-              <div className="stat-card">
-                <p>Total Visitors</p>
-                <h2>{visitors.length}</h2>
-              </div>
+              <button
+  type="button"
+  className="stat-card analytics-link-card"
+  onClick={() => setActiveTab("Visitor Analytics")}
+>
+  <p>Total Visitors</p>
+  <h2>{visitors.length}</h2>
+  <span>View visitor analytics →</span>
+</button>
 
-              <div className="stat-card">
+              <button
+                type="button"
+                className="stat-card analytics-link-card"
+                onClick={() => setActiveTab("All Companies")}
+              >
                 <p>Companies</p>
                 <h2>
-                  {new Set(visitors.map((v) => v.company).filter(Boolean)).size}
+                  {new Set(visitors.map((v) => (v.company || "").trim().toLowerCase()).filter(Boolean)).size}
                 </h2>
-              </div>
+                <span>View all companies →</span>
+              </button>
 
-              <div className="stat-card">
+              <button
+                type="button"
+                className="stat-card analytics-link-card"
+                onClick={() => setActiveTab("Exhibitions")}
+              >
                 <p>Exhibitions</p>
                 <h2>{exhibitions.length}</h2>
-              </div>
+                <span>View exhibitions →</span>
+              </button>
 
-              <div className="stat-card">
+              <button
+                type="button"
+                className="stat-card analytics-link-card"
+                onClick={() => setActiveTab("Product Interests")}
+              >
                 <p>Product Interests</p>
                 <h2>
                   {visitors.reduce(
@@ -1113,7 +1088,8 @@ onClick={() => {
                     0
                   )}
                 </h2>
-              </div>
+                <span>View product interests →</span>
+              </button>
             </section>
 
             <section className="visitor-section overview-visitors">
@@ -1133,6 +1109,372 @@ onClick={() => {
             </section>
           </>
         )}
+        {/* ALL COMPANIES */}
+{activeTab === "All Companies" && (() => {
+  const companyMap = new Map();
+
+  visitors.forEach((visitor) => {
+    const companyName = (visitor.company || "").trim();
+    if (!companyName) return;
+
+    const companyKey = companyName.toLowerCase();
+    if (!companyMap.has(companyKey)) {
+      companyMap.set(companyKey, {
+        name: companyName,
+        representatives: [],
+        interests: new Set(),
+        visitorCount: 0,
+      });
+    }
+
+    const company = companyMap.get(companyKey);
+    company.visitorCount += 1;
+
+    const representativeName = (visitor.name || "").trim();
+    const designation = (visitor.designation || "").trim();
+    if (representativeName) {
+      const representativeKey = `${representativeName.toLowerCase()}|${designation.toLowerCase()}`;
+      if (!company.representatives.some((rep) => rep.key === representativeKey)) {
+        company.representatives.push({
+          key: representativeKey,
+          name: representativeName,
+          designation,
+        });
+      }
+    }
+
+    (visitor.interests || []).forEach((interest) => {
+      if (interest) company.interests.add(interest);
+    });
+  });
+
+  const companies = Array.from(companyMap.values()).sort((a, b) =>
+    a.name.localeCompare(b.name)
+  );
+  const companySearchTerm = companyDirectorySearch.trim().toLowerCase();
+  const filteredCompanies = companies.filter((company) => {
+    if (!companySearchTerm) return true;
+    const representativeText = company.representatives
+      .map((rep) => `${rep.name} ${rep.designation}`)
+      .join(" ");
+    const interestsText = Array.from(company.interests).join(" ");
+    return `${company.name} ${representativeText} ${interestsText}`
+      .toLowerCase()
+      .includes(companySearchTerm);
+  });
+
+  return (
+    <section className="visitor-section analytics-page">
+      <div className="analytics-heading">
+        <div>
+          <h2>All Companies</h2>
+          <p>Companies, their representatives and the products they are interested in.</p>
+        </div>
+        <button type="button" onClick={() => setActiveTab("Overview")}>
+          Back to Overview
+        </button>
+      </div>
+
+      <div style={{ margin: "18px 0 14px", maxWidth: "340px", position: "relative" }}>
+        <Search
+          size={17}
+          style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#7b8794", pointerEvents: "none" }}
+        />
+        <input
+          type="search"
+          value={companyDirectorySearch}
+          onChange={(event) => setCompanyDirectorySearch(event.target.value)}
+          placeholder="Search companies..."
+          aria-label="Search companies, representatives or product interests"
+          style={{ width: "100%", boxSizing: "border-box", padding: "10px 12px 10px 38px", border: "1px solid #d7dee8", borderRadius: "8px", fontSize: "14px", outlineOffset: "2px" }}
+        />
+      </div>
+
+      <div className="analytics-summary-grid">
+        <div className="analytics-summary-card">
+          <span>Total Companies</span>
+          <strong>{companies.length}</strong>
+        </div>
+        <div className="analytics-summary-card">
+          <span>Total Representatives</span>
+          <strong>{companies.reduce((total, company) => total + company.representatives.length, 0)}</strong>
+        </div>
+        <div className="analytics-summary-card">
+          <span>Visitors Recorded</span>
+          <strong>{visitors.length}</strong>
+        </div>
+      </div>
+
+      <div className="analytics-panel">
+        {companies.length === 0 ? (
+          <p>No companies have been recorded yet.</p>
+        ) : filteredCompanies.length === 0 ? (
+          <p>No companies match “{companyDirectorySearch}”.</p>
+        ) : (
+          <div className="company-directory-table-wrap" style={{ overflowX: "auto" }}>
+            <table className="company-directory-table" style={{ width: "100%", borderCollapse: "collapse", minWidth: "760px" }}>
+              <thead>
+                <tr>
+                  <th style={{ textAlign: "left", padding: "14px" }}>Company</th>
+                  <th style={{ textAlign: "left", padding: "14px" }}>Representatives</th>
+                  <th style={{ textAlign: "left", padding: "14px" }}>Product Interests</th>
+                  <th style={{ textAlign: "center", padding: "14px" }}>Visitors</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredCompanies.map((company) => (
+                  <tr key={company.name.toLowerCase()}>
+                    <td style={{ padding: "14px", verticalAlign: "top" }}>
+                      <button
+                        type="button"
+                        className="company-name-link"
+                        style={{ border: "none", padding: 0, background: "transparent", color: "#2563a8", font: "inherit", fontWeight: 600, textAlign: "left", cursor: "pointer" }}
+                        onClick={() => {
+                          setFilterCompany(company.name);
+                          setFilterExhibition("");
+                          setFilterState("");
+                          setSearch("");
+                          setActiveTab("All Visitors");
+                        }}
+                      >
+                        {company.name}
+                      </button>
+                    </td>
+                    <td style={{ padding: "14px", verticalAlign: "top" }}>
+                      {company.representatives.length === 0 ? "—" : company.representatives.map((rep) => (
+                        <div key={rep.key} style={{ marginBottom: "10px" }}>
+                          <strong>{rep.name}</strong>
+                          {rep.designation && <div style={{ fontSize: "0.88em", opacity: 0.72, marginTop: "2px" }}>{rep.designation}</div>}
+                        </div>
+                      ))}
+                    </td>
+                    <td style={{ padding: "14px", verticalAlign: "top" }}>
+                      {company.interests.size ? Array.from(company.interests).join(", ") : "—"}
+                    </td>
+                    <td style={{ padding: "14px", textAlign: "center", verticalAlign: "top" }}>
+                      {company.visitorCount}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+})()}
+
+        {/* VISITOR ANALYTICS */}
+{activeTab === "Visitor Analytics" && (() => {
+  const totalVisitors = visitors.length;
+
+  const uniqueCompanies = new Set(
+    visitors.map((visitor) => visitor.company?.trim()).filter(Boolean)
+  ).size;
+
+  const visitorsWithOrders = visitors.filter(
+    (visitor) => visitor.order_placed === true
+  );
+
+  const ordersWithValue = visitorsWithOrders.filter(
+    (visitor) =>
+      visitor.order_value !== null &&
+      visitor.order_value !== undefined &&
+      visitor.order_value !== "" &&
+      Number.isFinite(Number(visitor.order_value))
+  );
+
+  const recordedOrderValue = ordersWithValue.reduce(
+    (total, visitor) => total + Number(visitor.order_value),
+    0
+  );
+
+  const stateCounts = {};
+
+  visitors.forEach((visitor) => {
+    const stateName = visitor.state || visitor.union_territory;
+
+    if (stateName) {
+      stateCounts[stateName] = (stateCounts[stateName] || 0) + 1;
+    }
+  });
+
+  const popularStates = Object.entries(stateCounts)
+    .sort((a, b) => b[1] - a[1]);
+
+  const monthlyVisitors = [];
+
+  for (let i = 5; i >= 0; i--) {
+    const date = new Date();
+    date.setDate(1);
+    date.setMonth(date.getMonth() - i);
+
+    const month = date.getMonth();
+    const year = date.getFullYear();
+
+    const count = visitors.filter((visitor) => {
+      if (!visitor.created_at) return false;
+
+      const visitorDate = new Date(visitor.created_at);
+
+      return (
+        visitorDate.getMonth() === month &&
+        visitorDate.getFullYear() === year
+      );
+    }).length;
+
+    monthlyVisitors.push({
+      label: date.toLocaleDateString("en-IN", {
+        month: "short",
+        year: "2-digit",
+      }),
+      count,
+    });
+  }
+
+  const highestMonthlyCount = Math.max(
+    1,
+    ...monthlyVisitors.map((month) => month.count)
+  );
+
+  return (
+    <section className="visitor-section analytics-page">
+      <div className="analytics-heading">
+        <div>
+          <h2>Visitor Analytics</h2>
+          <p>Understand visitor activity, product interest and order performance.</p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab("Overview")}
+        >
+          Back to Overview
+        </button>
+      </div>
+
+      {/* SUMMARY CARDS */}
+      <div className="analytics-summary-grid">
+        <div className="analytics-summary-card">
+          <span>Total Visitors</span>
+          <strong>{totalVisitors}</strong>
+        </div>
+
+        <div className="analytics-summary-card">
+          <span>Unique Companies</span>
+          <strong>{uniqueCompanies}</strong>
+        </div>
+
+        <div className="analytics-summary-card">
+          <span>Orders Placed</span>
+          <strong>{visitorsWithOrders.length}</strong>
+        </div>
+
+        <div className="analytics-summary-card">
+          <span>Recorded Order Value</span>
+          <strong>
+            {recordedOrderValue.toLocaleString("en-IN", {
+              style: "currency",
+              currency: "INR",
+              maximumFractionDigits: 2,
+            })}
+          </strong>
+          <small>
+            {ordersWithValue.length} of {visitorsWithOrders.length} orders have a value entered
+          </small>
+        </div>
+      </div>
+
+      {/* MONTHLY VISITOR TREND */}
+      <div className="analytics-panel">
+        <h3>Visitor Registration Trend</h3>
+        <p>Visitors registered in each of the last six months.</p>
+
+        <div className="analytics-monthly-chart">
+          {monthlyVisitors.map((month) => (
+            <div className="analytics-month-column" key={month.label}>
+              <strong>{month.count}</strong>
+
+              <div className="analytics-month-bar-area">
+                <div
+                  className="analytics-month-bar"
+                  style={{
+                    height: `${(month.count / highestMonthlyCount) * 100}%`,
+                  }}
+                />
+              </div>
+
+              <span>{month.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* STATE-WISE VISITORS */}
+      <div className="analytics-panel">
+          <h3>Visitors by State / Union Territory</h3>
+          <p>Where your visitors are coming from.</p>
+
+          {popularStates.length === 0 ? (
+            <p>No state information available yet.</p>
+          ) : (
+            <div className="analytics-ranking-list">
+              {popularStates.map(([stateName, count]) => (
+                <div className="analytics-ranking-item" key={stateName}>
+                  <div className="analytics-ranking-label">
+                    <span>{stateName}</span>
+                    <strong>{count}</strong>
+                  </div>
+
+                  <div className="analytics-ranking-track">
+                    <div
+                      className="analytics-ranking-fill state-ranking-fill"
+                      style={{
+                        width: `${(count / popularStates[0][1]) * 100}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+      </div>
+
+      {/* ORDER ANALYSIS */}
+      <div className="analytics-panel">
+        <h3>Order Analysis</h3>
+        <p>Order information recorded in your visitor database.</p>
+
+        <div className="analytics-order-grid">
+          <div>
+            <span>Orders placed</span>
+            <strong>{visitorsWithOrders.length}</strong>
+          </div>
+
+          <div>
+            <span>Orders with value entered</span>
+            <strong>{ordersWithValue.length}</strong>
+          </div>
+
+          <div>
+            <span>Orders without value</span>
+            <strong>{visitorsWithOrders.length - ordersWithValue.length}</strong>
+          </div>
+
+          <div>
+            <span>Recorded order value</span>
+            <strong>
+              ₹{recordedOrderValue.toLocaleString("en-IN", {
+                maximumFractionDigits: 2,
+              })}
+            </strong>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+})()}
 
                {/* EXHIBITIONS */}
         {activeTab === "Exhibitions" && (
@@ -1570,6 +1912,78 @@ onClick={() => {
           </section>
         )}
 
+
+
+        {/* PRODUCT INTERESTS PAGE */}
+        {activeTab === "Product Interests" && (
+          <section className="visitor-section">
+            <div className="visitor-heading">
+              <div>
+                <h2>Product Interests & Additional Requirements</h2>
+                <p>View product preferences and requirements recorded from all exhibition visitors.</p>
+              </div>
+              <button type="button" onClick={() => setActiveTab("Overview")}>Back to Overview</button>
+            </div>
+
+            <div className="analytics-panel all-visitors-data-panel">
+              <h3>Product Interests</h3>
+              <p>Products selected by visitors across all exhibitions.</p>
+              {(() => {
+                const productCounts = {};
+                visitors.forEach((visitor) => {
+                  (visitor.interests || []).forEach((product) => {
+                    const productName = String(product || "").trim();
+                    if (productName) productCounts[productName] = (productCounts[productName] || 0) + 1;
+                  });
+                });
+                const productRows = Object.entries(productCounts).sort((a, b) => b[1] - a[1]);
+                return productRows.length === 0 ? (
+                  <p>No product interest data available yet.</p>
+                ) : (
+                  <div className="table-scroll">
+                    <table className="crm-table analytics-data-table">
+                      <thead><tr><th>Product</th><th>Number of Visitors</th></tr></thead>
+                      <tbody>
+                        {productRows.map(([product, count]) => (
+                          <tr key={product}><td>{product}</td><td>{count}</td></tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                );
+              })()}
+            </div>
+
+            <div className="analytics-panel all-visitors-data-panel">
+              <h3>Additional Requirements</h3>
+              <p>Requirements recorded for visitors across all exhibitions.</p>
+              {(() => {
+                const requirementRows = visitors.filter(
+                  (visitor) => String(visitor.requirements || "").trim()
+                );
+                return requirementRows.length === 0 ? (
+                  <p>No additional requirements recorded yet.</p>
+                ) : (
+                  <div className="table-scroll">
+                    <table className="crm-table analytics-data-table">
+                      <thead><tr><th>Visitor Name</th><th>Company</th><th>Additional Requirement</th></tr></thead>
+                      <tbody>
+                        {requirementRows.map((visitor) => (
+                          <tr key={visitor.id}>
+                            <td>{visitor.name || "—"}</td>
+                            <td>{visitor.company || "—"}</td>
+                            <td className="crm-notes-cell">{visitor.requirements}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                );
+              })()}
+            </div>
+          </section>
+        )}
+
         {/* ALL VISITORS */}
         {activeTab === "All Visitors" && (
           <section className="visitor-section">
@@ -1692,6 +2106,7 @@ onClick={() => {
 </div>
 
 </div>
+
 {visitorList(filteredVisitors)}
 
           </section>
@@ -1875,11 +2290,34 @@ onClick={() => {
                     </p>
 
                     <p>
-                      <strong>Exhibition:</strong>{" "}
-                      {exhibitionName(visitor.exhibition_id)}
-                    </p>
+  <strong>Exhibition:</strong>{" "}
+  {exhibitionName(visitor.exhibition_id)}
+</p>
 
-                    <hr />
+<h4>Order Value (Optional)</h4>
+
+<div className="order-value-field">
+  <span>₹</span>
+  <input
+    type="number"
+    min="0"
+    step="0.01"
+    placeholder="Enter order value"
+    defaultValue={visitor.order_value ?? ""}
+    onBlur={(event) => {
+      const value = event.target.value;
+      const newValue = value === "" ? null : Number(value);
+
+      if (newValue !== visitor.order_value) {
+        updateVisitor(visitor.id, {
+          order_value: newValue,
+        });
+      }
+    }}
+  />
+</div>
+
+<hr />
 
                     <h4>Order Status</h4>
 
